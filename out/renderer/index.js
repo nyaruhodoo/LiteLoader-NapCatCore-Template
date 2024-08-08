@@ -1,6 +1,6 @@
 const p = {
   test: !1
-}, g = 4, d = "extension", f = "liteloader-napcatcore-template", u = "iteloader-napcatcore-template", y = "LiteLoaderQQNT的插件模板", m = "0.1.0", h = [
+}, g = 4, d = "extension", f = "liteloader-napcatcore-template", a = "liteloader-napcatcore-template", y = "LiteLoaderQQNT的插件模板", m = "0.0.1", h = [
   {
     name: "Nyaruhodo",
     link: "https://github.com/nyaruhodoo"
@@ -13,11 +13,11 @@ const p = {
   renderer: "./out/renderer/index.js",
   main: "./out/main/index.js",
   preload: "./out/preload/index.js"
-}, l = {
+}, u = {
   manifest_version: g,
   type: d,
   name: f,
-  slug: u,
+  slug: a,
   description: y,
   version: m,
   authors: h,
@@ -30,14 +30,14 @@ class c {
    * 初始化插件配置
    */
   static async initConfig() {
-    const e = await LiteLoader.api.config.get(l.slug, p), n = this.mergeConfig(e, p);
+    const e = await LiteLoader.api.config.get(u.slug, p), n = this.mergeConfig(e, p);
     return this.updateConfig(n), n;
   }
   /**
    * 更新插件配置
    */
   static async updateConfig(e) {
-    await LiteLoader.api.config.set(l.slug, e), this.log("Config已更新", JSON.stringify(e));
+    await LiteLoader.api.config.set(u.slug, e), this.log("Config已更新", JSON.stringify(e));
   }
   /**
    * 合并配置项
@@ -59,13 +59,13 @@ class c {
     return t;
   }
   static {
-    this.updateEventName = `${l.slug}ConfigUpdate`;
+    this.updateEventName = `${u.slug}ConfigUpdate`;
   }
   /**
    * 带有插件标识的Log
    */
   static log(...e) {
-    console.log(`${l.slug}:`, ...e);
+    console.log(`${u.slug}:`, ...e);
   }
   /**
    * 生成随机整数
@@ -110,9 +110,9 @@ class c {
     const i = n.split("."), r = i.pop();
     if (r) {
       for (; i.length; ) {
-        const a = i.shift();
-        if (!a) return;
-        s = s[a];
+        const l = i.shift();
+        if (!l) return;
+        s = s[l];
       }
       return s[r] = t;
     }
@@ -171,10 +171,10 @@ const x = (o) => [
     `;
   const r = i.querySelector("setting-list");
   s && (r?.setAttribute("is-collapsible", "true"), r?.setAttribute("data-title", s));
-  for (const a of t)
-    r?.append(E(a, o));
+  for (const l of t)
+    r?.append(E(l, o));
   return i;
-}), L = "" + new URL("index.css", import.meta.url).href, b = window[u], S = async (o) => {
+}), L = "" + new URL("index.css", import.meta.url).href, b = window[a], S = async (o) => {
   const e = await c.initConfig(), n = c.createDeepProxy(e, {
     set(t, s, i) {
       t[s] = i;
@@ -187,16 +187,16 @@ const x = (o) => [
 class A extends HTMLElement {
   async connectedCallback() {
     const e = await S((s) => {
-      b.configUpdate(s), new BroadcastChannel(u).postMessage(s);
+      b.configUpdate(s), new BroadcastChannel(a).postMessage(s);
     }), n = this.attachShadow({ mode: "open" });
     n.append(...k(e));
     const t = document.createElement("link");
     t.rel = "stylesheet", t.href = L, n.append(t);
   }
 }
-customElements.define("config-element", A);
+customElements.define(a, A);
 const P = (o) => {
-  o.innerHTML = "<config-element></config-element>";
+  o.innerHTML = `<${a}></${a}>`;
 };
 export {
   P as onSettingWindowCreated

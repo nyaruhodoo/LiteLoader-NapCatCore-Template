@@ -46,8 +46,8 @@ class ConfigElement extends HTMLElement {
     shadow.append(linkEl)
   }
 }
-customElements.define('config-element', ConfigElement)
+customElements.define(slug, ConfigElement)
 
 export const onSettingWindowCreated = (view: HTMLElement) => {
-  view.innerHTML = `<config-element></config-element>`
+  view.innerHTML = `<${slug}></${slug}>`
 }
