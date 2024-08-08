@@ -2,7 +2,7 @@
   "manifest_version": 4,
   "type": "extension",
   "name": "liteloader-napcatcore-template",
-  "slug": "iteloader-napcatcore-template",
+  "slug": "liteloader-napcatcore-template",
   "description": "LiteLoaderQQNT的插件模板",
   "version": "0.0.1",
   "authors": [
