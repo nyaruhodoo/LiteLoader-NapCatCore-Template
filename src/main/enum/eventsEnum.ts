@@ -18,5 +18,11 @@ export enum Events {
   onRefreshGuildUserProfileInfo = 'NodeIKernelGuildListener.onRefreshGuildUserProfileInfo',
 
   // 收到新消息
-  onRecvMsg = 'NodeIKernelMsgListener.onRecvMsg'
+  onRecvMsg = 'NodeIKernelMsgListener.onRecvMsg',
+
+  // 最近联系人更改，随着收到新消息一起触发
+  onRecentContactListChangedVer2 = 'NodeIKernelRecentContactListener.onRecentContactListChangedVer2',
+
+  // 收到新消息后的系统通知，随着收到新消息一起触发
+  onRecentContactNotification = 'NodeIKernelRecentContactListener.onRecentContactNotification'
 }
