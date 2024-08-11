@@ -1,11 +1,11 @@
-import Process from 'node:process'
 import type { EventEmitter } from 'node:events'
 import type { NTWrapperNodeApi } from 'napcat.core'
+import Process from 'node:process'
 import { NTCoreWrapper } from 'napcat.core'
 
 interface hookWarpperConfigType {
   // 是否打印日志
-  isLog: boolean
+  log: boolean
   // 需要忽略的黑名单事件
   eventBlacklist?: string[]
   // 拦截事件，可以修改参数
@@ -17,9 +17,15 @@ interface hookWarpperConfigType {
 }
 
 /**
- * 全局唯一 NTCoreWrapper 实例
+ * 获取 WrapperNodeApi
  */
-let NTcore: NTCoreWrapper | undefined
+export const getWrapperNodeApi = () => {
+  if (!WrapperNodeApi) throw new Error('WrapperNodeApi 未初始化成功')
+
+  return WrapperNodeApi
+}
+let WrapperNodeApi: NTWrapperNodeApi | undefined
+
 /**
  * 获取 NTCoreWrapper 实例
  */
@@ -28,11 +34,12 @@ export const getNTcore = () => {
 
   return NTcore
 }
+let NTcore: NTCoreWrapper | undefined
 
 /**
  * 打印函数参数
  */
-const log = (ret: unknown, args: unknown[], fnName?: string) => {
+const logFn = (ret: unknown, args: unknown[], fnName?: string) => {
   if (fnName) {
     console.log(`==============${fnName}被调用=============`)
   }
@@ -57,7 +64,7 @@ const log = (ret: unknown, args: unknown[], fnName?: string) => {
 const hookInstance = ({
   instance,
   rootName,
-  isLog,
+  log,
   eventBlacklist,
   eventListeners,
   eventEmitter,
@@ -75,10 +82,7 @@ const hookInstance = ({
 
     instance[key] = function (...args) {
       // 拦截黑名单事件
-      if (eventBlacklist?.includes(rootKey)) {
-        // isLog && console.log(`${rootKey} 调用已被拦截`)
-        return
-      }
+      if (eventBlacklist?.includes(rootKey)) return
 
       // 拦截参数
       const hookArgs = eventInterceptors?.[rootKey]?.(args) ?? args
@@ -87,26 +91,23 @@ const hookInstance = ({
 
       if (ret instanceof Promise) {
         ret.then((asyncRet) => {
-          isLog && log(asyncRet, args, rootKey)
-          eventListeners?.[rootKey]?.({
+          const params = {
             ret: asyncRet,
             params: args
-          })
-          eventEmitter?.emit(rootKey, {
-            ret: asyncRet,
-            params: args
-          })
+          }
+
+          log && logFn(asyncRet, args, rootKey)
+          eventListeners?.[rootKey]?.(params)
+          eventEmitter?.emit(rootKey, params)
         })
       } else {
-        isLog && log(ret, args, rootKey)
-        eventListeners?.[rootKey]?.({
-          ret: ret,
+        const params = {
+          ret,
           params: args
-        })
-        eventEmitter?.emit(rootKey, {
-          ret: ret,
-          params: args
-        })
+        }
+        log && logFn(ret, args, rootKey)
+        eventListeners?.[rootKey]?.(params)
+        eventEmitter?.emit(rootKey, params)
       }
 
       /**
@@ -116,7 +117,7 @@ const hookInstance = ({
         hookInstance({
           instance: ret,
           rootName: `${rootKey}`,
-          isLog,
+          log,
           eventBlacklist,
           eventListeners,
           eventInterceptors,
@@ -132,14 +133,14 @@ const hookInstance = ({
 }
 
 /**
+ * 存放构建过的实例，主要用于避免多次打印
+ */
+const instanceMap = new Map()
+
+/**
  * hook wrapper
  */
 export const hookWrapper = (config: hookWarpperConfigType): Promise<NTCoreWrapper> => {
-  let WrapperNodeApi: NTWrapperNodeApi
-
-  // 存放构建的实例
-  const wrapperMpa = new Map()
-
   return new Promise((res) => {
     Process.dlopen = new Proxy(Process.dlopen, {
       apply(
@@ -171,24 +172,24 @@ export const hookWrapper = (config: hookWarpperConfigType): Promise<NTCoreWrappe
               return new Proxy(target[p], {
                 construct(target, argArray) {
                   // 保证只打印一次构造，避免污染log
-                  const isNew = wrapperMpa.get(p)
-                  const isLog = !isNew && config.isLog
+                  const isNew = instanceMap.get(p)
+                  const log = !isNew && config.log
 
                   // hook函数的公共参数
                   const baseConfig = {
                     rootName: p,
-                    isLog: config.isLog,
+                    log: config.log,
                     eventBlacklist: config.eventBlacklist,
                     eventListeners: config.eventListeners,
                     eventEmitter: config.eventEmitter,
                     eventInterceptors: config.eventInterceptors
                   }
 
-                  if (isLog) console.log(`--------------------- ${p}被构造 ---------------------`)
+                  log && console.log(`--------------------- ${p}被构造 ---------------------`)
 
                   // hook args
                   if (argArray.length) {
-                    if (isLog) {
+                    if (log) {
                       console.log('构造参数:')
                       console.log(argArray)
                     }
@@ -205,7 +206,7 @@ export const hookWrapper = (config: hookWarpperConfigType): Promise<NTCoreWrappe
                   const ret: any = Reflect.construct(target, argArray)
 
                   // 构造参数单独打印，这里仅打印返回值
-                  isLog && log(ret, [])
+                  log && logFn(ret, [])
 
                   // hook ret
                   if (Object.getOwnPropertyNames(ret).length === 0) {
@@ -215,13 +216,13 @@ export const hookWrapper = (config: hookWarpperConfigType): Promise<NTCoreWrappe
                     })
                   }
 
-                  if (p === 'NodeIQQNTWrapperSession') {
+                  if (p === 'NodeIQQNTWrapperSession' && WrapperNodeApi) {
                     const NTcore = new NTCoreWrapper(WrapperNodeApi, ret)
 
                     res(NTcore)
                   }
 
-                  !isNew && wrapperMpa.set(p, ret)
+                  !isNew && instanceMap.set(p, ret)
 
                   return ret
                 }

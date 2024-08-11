@@ -3,7 +3,7 @@ import { eventEmitter } from '@/main/eventEmitter'
 import { Events } from './enum/eventsEnum'
 ;(async () => {
   await hookWrapper({
-    isLog: false,
+    log: false,
     eventBlacklist: [Events.sendLog, Events.requestTianshuAdv],
     eventEmitter
   })
