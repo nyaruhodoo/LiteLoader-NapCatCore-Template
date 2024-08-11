@@ -1,7 +1,7 @@
 import type { EventEmitter } from 'node:events'
-import type { NTWrapperNodeApi } from 'napcat.core'
+import type { NTWrapperNodeApi, NodeIKernelLoginService } from 'napcat.core'
 import Process from 'node:process'
-import { NTCoreWrapper } from 'napcat.core'
+import { LoginListener, NTCoreWrapper } from 'napcat.core'
 
 interface hookWarpperConfigType {
   // 是否打印日志
@@ -14,6 +14,8 @@ interface hookWarpperConfigType {
   eventEmitter?: EventEmitter
   // 内置的事件监听器
   eventListeners?: Record<string, (event: { ret: any; params: any[] }) => void>
+  // 是否等待登录
+  waitLogin?: boolean
 }
 
 /**
@@ -175,6 +177,8 @@ export const hookWrapper = (config: hookWarpperConfigType): Promise<NTCoreWrappe
                   const isNew = instanceMap.get(p)
                   const log = !isNew && config.log
 
+                  log && console.log(`--------------------- ${p}被构造 ---------------------`)
+
                   // hook函数的公共参数
                   const baseConfig = {
                     rootName: p,
@@ -184,8 +188,6 @@ export const hookWrapper = (config: hookWarpperConfigType): Promise<NTCoreWrappe
                     eventEmitter: config.eventEmitter,
                     eventInterceptors: config.eventInterceptors
                   }
-
-                  log && console.log(`--------------------- ${p}被构造 ---------------------`)
 
                   // hook args
                   if (argArray.length) {
@@ -203,12 +205,8 @@ export const hookWrapper = (config: hookWarpperConfigType): Promise<NTCoreWrappe
                     }
                   }
 
-                  const ret: any = Reflect.construct(target, argArray)
-
-                  // 构造参数单独打印，这里仅打印返回值
-                  log && logFn(ret, [])
-
                   // hook ret
+                  const ret: any = Reflect.construct(target, argArray)
                   if (Object.getOwnPropertyNames(ret).length === 0) {
                     hookInstance({
                       ...baseConfig,
@@ -216,13 +214,28 @@ export const hookWrapper = (config: hookWarpperConfigType): Promise<NTCoreWrappe
                     })
                   }
 
-                  if (p === 'NodeIQQNTWrapperSession' && WrapperNodeApi) {
-                    const NTcore = new NTCoreWrapper(WrapperNodeApi, ret)
+                  !isNew && instanceMap.set(p, ret)
 
+                  if (p === 'NodeIQQNTWrapperSession' && WrapperNodeApi && !config.waitLogin) {
+                    const NTcore = new NTCoreWrapper(WrapperNodeApi, ret)
                     res(NTcore)
                   }
 
-                  !isNew && instanceMap.set(p, ret)
+                  // 等待登录
+                  if (p === 'NodeIKernelLoginService' && WrapperNodeApi && config.waitLogin) {
+                    const NodeIKernelLoginService: NodeIKernelLoginService = ret
+                    const NCLoginListener = new LoginListener()
+                    NCLoginListener.onQRCodeLoginSucceed = () => {
+                      const NTcore = new NTCoreWrapper(WrapperNodeApi!, instanceMap.get('NodeIQQNTWrapperSession'))
+                      res(NTcore)
+                    }
+                    NodeIKernelLoginService.addKernelLoginListener(
+                      new WrapperNodeApi!.NodeIKernelLoginListener(NCLoginListener)
+                    )
+                  }
+
+                  // 构造参数单独打印，这里仅打印返回值
+                  log && logFn(ret, [])
 
                   return ret
                 }
