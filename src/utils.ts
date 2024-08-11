@@ -1,4 +1,5 @@
-import { defaultConfig, ConfigType } from '@/defaultConfig'
+import type { ConfigType } from '@/defaultConfig'
+import { defaultConfig } from '@/defaultConfig'
 import manifest from '@/manifest'
 
 export class Utils {

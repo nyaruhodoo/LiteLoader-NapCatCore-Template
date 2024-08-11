@@ -1,6 +1,8 @@
 import Process from 'node:process'
 import type { EventEmitter } from 'node:events'
-import { NTWrapperNodeApi, NTCoreWrapper } from 'napcat.core'
+import type { NTWrapperNodeApi } from 'napcat.core'
+import { NTCoreWrapper } from 'napcat.core'
+
 interface hookWarpperConfigType {
   // 是否打印日志
   isLog: boolean

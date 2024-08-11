@@ -1,6 +1,6 @@
 import { join, resolve } from 'node:path'
 import { defineConfig } from 'electron-vite'
-import { UserConfig } from 'vite'
+import type { UserConfig } from 'vite'
 
 const baseConfig: UserConfig = {
   resolve: {

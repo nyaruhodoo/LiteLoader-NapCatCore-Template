@@ -1,5 +1,5 @@
-import { ConfigType } from '@/defaultConfig'
-import { ConfigItemType } from './createConfigViewConfig'
+import type { ConfigType } from '@/defaultConfig'
+import type { ConfigItemType } from './createConfigViewConfig'
 import { Utils } from '@/utils'
 
 export const createConfigViewItem = (item: ConfigItemType, responsiveConfig: ConfigType) => {

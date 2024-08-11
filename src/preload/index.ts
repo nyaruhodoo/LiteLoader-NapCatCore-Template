@@ -1,8 +1,8 @@
+import type { ContextBridgeApiType } from '@/types/contextBridge'
+import type { ConfigType } from '@/defaultConfig'
 import { contextBridge, ipcRenderer } from 'electron'
 import { slug } from '@/manifest'
-import { ConfigType } from '@/defaultConfig'
 import { Utils } from '@/utils'
-import type { ContextBridgeApiType } from '@/types/contextBridge'
 
 const contextBridgeApi: ContextBridgeApiType = {
   configUpdate(config: ConfigType) {
