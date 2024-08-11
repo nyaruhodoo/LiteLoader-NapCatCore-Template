@@ -50,11 +50,6 @@ export class Utils {
   }
 
   /**
-   * 插件配置更新时派发的事件
-   */
-  static updateEventName = `${manifest.slug}ConfigUpdate`
-
-  /**
    * 带有插件标识的Log
    */
   static log(...args) {
