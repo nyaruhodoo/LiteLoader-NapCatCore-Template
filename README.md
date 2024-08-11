@@ -3,7 +3,6 @@
 自用插件开发模板，提供的功能如下
 
 - 快速创建插件配置页面
-- 默认合并新旧插件配置项，只需要更新 defaultConfig
 - 默认 Hook Wrapper ，创建 NTCoreWrapper 实例
 
 ## 待办事项
@@ -17,12 +16,16 @@
 
 ## 使用教程
 
-实际上没什么教程，我只会告诉你需要修改哪些东西
+实际上没什么很仔细的教程，我只会告诉你需要修改哪些东西以及一些注意事项
 
-- 修改 `manifest.json` ，代码中依赖了 slug 作为标识符
-- 修改 `src/defaultConfig` 和 `src/renderer/configPage/createConfigViewConfig.ts` 你总得有自己的配置文件不是？
+- 修改 `manifest.json` ，代码中依赖了 slug 作为标识符，并且命名要符合 `customElements.define()` 的参数要求，当然如果你不喜欢可以自己进行改动
+- 修改 `src/defaultConfig` 和 `src/renderer/configPage/createConfigViewConfig.ts` 你总得有自己的配置文件不是
+- 配置文件更新后会向主线程使用 `send` 派发 `${slug}:update` 事件，向渲染层使用 [BC](https://developer.mozilla.org/zh-CN/docs/Web/API/BroadcastChannel) 派发 `${slug}` 频道事件
+- 配置文件初始化时会默认合并新旧配置，你可以去阅读代码了解合并策略
+- `hookWrapper` 的 `waitLogin` 参数可以用来等待用户登陆后再进行初始化，主要是因为核心 API 都需要等待登陆后才可调用
+- `hookWrapper` 中我默认屏蔽了2个事件，如果你不需要也可以自己移除
 
-当你修改某些配置项时一定要同步修改类型，这样就可以警告你哪里需要修改
+大概就这些，其他的我想到再补充
 
 ## 构建相关
 
