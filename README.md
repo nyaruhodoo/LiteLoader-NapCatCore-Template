@@ -105,19 +105,25 @@ static mergeConfig(oldConfig: Record<string, any>, newConfig: ConfigType) {
 
 我想看源码比我打字应该更好理解一些
 
-### 引用静态资源
-
 ## 构建相关
 
 因基于 electron-vite 进行构建，所以功能大差不差，只是做了略微修改  
-main、preload、renderer 3个文件都是独立打包，打包后不存在共同引用，但不妨碍你在开发时引用共同的代码，在打包后会分别复制到3个文件中  
-node_modules 中的文件也会跟随打包，目的是为了它人使用插件时不需要在安装依赖
+main、preload、renderer 3个文件都是独立打包不会存在共同引用，但不妨碍你在开发时引用共同的代码，在打包后会分别复制到3个文件中
 
+**node_modules 中的文件也会跟随打包，目的是为了它人使用插件时不需要在安装依赖**  
 **唯一的注意事项是不要在渲染层引用 node 环境下的依赖**
 
-## 静态资源处理
+### 类型
 
-如果你希望简单处理，可以在 import 时添加参数来获取 `raw`、`base64`等格式
+- 全局注入了 `global.d.ts` 暴露 `LiteLoader` 相关API (类型可能有误)
+- 增加了 `contextBridge.d.ts` 用于在 `preload` 与 `renderer` 之间暴露接口时同步类型
+
+### 路径
+
+- 增加了常用的 `@` 来引用 `src` 目录
+- 增加了 `@/manifest` 来引用 `manifest.json` 文件
+
+### 引用静态资源
 
 ```ts
 import styleUrl from './index.scss?url'
@@ -128,12 +134,4 @@ linkEl.href = styleUrl
 shadow.append(linkEl)
 ```
 
-## 类型相关
-
-- 全局注入了 `global.d.ts` 暴露 `LiteLoader` 相关API (类型可能有误)
-- 增加了 `contextBridge.d.ts` 用于在 `preload` 与 `renderer` 之间暴露接口时同步类型
-
-## 路径相关
-
-- 增加了常用的 `@` 来引用 `src` 目录
-- 增加了 `@/manifest` 来引用 `manifest.json` 文件
+这些功能都是 `vite` 提供的，你也可以使用 `raw`、`base64` 等格式
