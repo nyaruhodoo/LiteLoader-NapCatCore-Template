@@ -1,6 +1,6 @@
 const p = {
   test: !1
-}, g = 4, d = "extension", f = "liteloader-napcatcore-template", a = "liteloader-napcatcore-template", y = "LiteLoaderQQNT的插件模板", m = "0.0.1", h = [
+}, d = 4, g = "extension", f = "liteloader-napcatcore-template", a = "liteloader-napcatcore-template", m = "LiteLoaderQQNT的插件模板", y = "0.0.1", h = [
   {
     name: "Nyaruhodo",
     link: "https://github.com/nyaruhodoo"
@@ -14,12 +14,12 @@ const p = {
   main: "./out/main/index.js",
   preload: "./out/preload/index.js"
 }, u = {
-  manifest_version: g,
-  type: d,
+  manifest_version: d,
+  type: g,
   name: f,
   slug: a,
-  description: y,
-  version: m,
+  description: m,
+  version: y,
   authors: h,
   dependencies: w,
   platform: C,
@@ -30,92 +30,92 @@ class c {
    * 初始化插件配置
    */
   static async initConfig() {
-    const e = await LiteLoader.api.config.get(u.slug, p), n = this.mergeConfig(e, p);
-    return this.updateConfig(n), n;
+    const n = await LiteLoader.api.config.get(u.slug, p), t = this.mergeConfig(n, p);
+    return this.updateConfig(t), t;
   }
   /**
    * 更新插件配置
    */
-  static async updateConfig(e) {
-    await LiteLoader.api.config.set(u.slug, e), this.log("Config已更新", JSON.stringify(e));
+  static async updateConfig(n) {
+    await LiteLoader.api.config.set(u.slug, n), this.log("Config已更新", JSON.stringify(n));
   }
   /**
    * 合并配置项
    */
-  static mergeConfig(e, n) {
-    const t = structuredClone(n);
-    for (const [s, i] of Object.entries(e))
-      if (Object.hasOwn(t, s) && Object.prototype.toString.call(i) === Object.prototype.toString.call(t[s])) {
-        if (Array.isArray(i)) {
-          t[s] = [.../* @__PURE__ */ new Set([...i, ...t[s]])];
+  static mergeConfig(n, t) {
+    const e = structuredClone(t);
+    for (const [i, o] of Object.entries(n))
+      if (Object.hasOwn(e, i) && Object.prototype.toString.call(o) === Object.prototype.toString.call(e[i])) {
+        if (Array.isArray(o)) {
+          e[i] = [.../* @__PURE__ */ new Set([...o, ...e[i]])];
           continue;
         }
-        if (typeof i == "object" && i) {
-          t[s] = this.mergeConfig(i, t[s]);
+        if (typeof o == "object" && o) {
+          e[i] = this.mergeConfig(o, e[i]);
           continue;
         }
-        t[s] = i;
+        e[i] = o;
       }
-    return t;
+    return e;
   }
   /**
    * 带有插件标识的Log
    */
-  static log(...e) {
-    console.log(`${u.slug}:`, ...e);
+  static log(...n) {
+    console.log(`${u.slug}:`, ...n);
   }
   /**
    * 生成随机整数
    */
-  static randomInteger(e, n) {
-    const t = e + Math.random() * (n + 1 - e);
-    return Math.floor(t);
+  static randomInteger(n, t) {
+    const e = n + Math.random() * (t + 1 - n);
+    return Math.floor(e);
   }
   /**
    * 返回一个指定时间后决议为 resolve 的 promise
    */
-  static wait(e) {
-    if (!(e <= 0))
-      return new Promise((n) => setTimeout(n, e));
+  static wait(n) {
+    if (!(n <= 0))
+      return new Promise((t) => setTimeout(t, n));
   }
   /**
    * 为对象创建深层Proxy
    */
-  static createDeepProxy(e, n) {
-    for (const t in e)
-      typeof e[t] == "object" && e[t] && (e[t] = c.createDeepProxy(e[t], n));
-    return new Proxy(e, n);
+  static createDeepProxy(n, t) {
+    for (const e in n)
+      typeof n[e] == "object" && n[e] && (n[e] = c.createDeepProxy(n[e], t));
+    return new Proxy(n, t);
   }
   /**
    * 根据path从对象中取值
    */
-  static getProperty(e, n) {
-    let t = e;
-    const s = n.split(".");
-    for (; s.length; ) {
-      const i = s.shift();
-      if (!i) return;
-      t = t[i];
+  static getProperty(n, t) {
+    let e = n;
+    const i = t.split(".");
+    for (; i.length; ) {
+      const o = i.shift();
+      if (!o) return;
+      e = e[o];
     }
-    return t;
+    return e;
   }
   /**
    * 根据path修改对象属性值
    */
-  static setProperty(e, n, t) {
-    let s = e;
-    const i = n.split("."), r = i.pop();
+  static setProperty(n, t, e) {
+    let i = n;
+    const o = t.split("."), r = o.pop();
     if (r) {
-      for (; i.length; ) {
-        const l = i.shift();
+      for (; o.length; ) {
+        const l = o.shift();
         if (!l) return;
-        s = s[l];
+        i = i[l];
       }
-      return s[r] = t;
+      return i[r] = e;
     }
   }
 }
-const x = (o) => [
+const x = (s) => [
   {
     title: "配置标题",
     foldTitle: "123",
@@ -125,76 +125,96 @@ const x = (o) => [
         type: "setting-switch",
         inputType: "text",
         keyPath: "test",
-        value: o.test
+        value: s.test
       }
     ]
   }
-], E = (o, e) => {
-  const n = document.createElement("setting-item");
-  n.setAttribute("data-direction", "row"), n.innerHTML = '<div class="setting-item-text"></div>';
+], E = ({
+  config: s,
+  update: n
+}) => {
+  const t = document.createElement("input");
+  return t.type = s.inputType ?? "text", t.value = s.value, t.addEventListener("change", () => {
+    const e = s.customStoreFormat ? s.customStoreFormat(t.value) : t.value;
+    n(s.keyPath, e);
+  }), t;
+}, b = ({
+  config: s,
+  update: n
+}) => {
+  const t = document.createElement(s.type);
+  return s.value && t.setAttribute("is-active", "true"), t.addEventListener("click", function() {
+    const e = t.hasAttribute("is-active");
+    t.toggleAttribute("is-active"), n(s.keyPath, !e);
+  }), t;
+}, k = (s, n) => {
+  const t = document.createElement("setting-item");
+  t.setAttribute("data-direction", "row"), t.innerHTML = '<div class="setting-item-text"></div>';
   {
-    const t = n.querySelector(".setting-item-text"), s = document.createElement("setting-text");
-    if (s.innerHTML = o.title, t.append(s), o.description) {
-      const i = document.createElement("setting-text");
-      i.setAttribute("data-type", "secondary"), i.innerHTML = o.description, t.append(i);
+    const e = t.querySelector(".setting-item-text"), i = document.createElement("setting-text");
+    if (i.innerHTML = s.title, e.append(i), s.description) {
+      const o = document.createElement("setting-text");
+      o.setAttribute("data-type", "secondary"), o.innerHTML = s.description, e.append(o);
     }
   }
   {
-    const t = document.createElement(o.type);
-    switch (n.append(t), o.type) {
+    let e;
+    const i = c.setProperty.bind(null, n);
+    switch (s.type) {
       case "setting-switch":
-        o.value && t.setAttribute("is-active", "true"), t.addEventListener("click", function() {
-          const i = t.hasAttribute("is-active");
-          t.toggleAttribute("is-active"), c.setProperty(e, o.keyPath, !i);
+        e = b({
+          config: s,
+          update: i
         });
         break;
       case "input":
-        t instanceof HTMLInputElement && (t.type = o.inputType ?? "text", t.value = o.value, t.addEventListener("change", () => {
-          const i = o.customStoreFormat ? o.customStoreFormat(t.value) : t.value;
-          c.setProperty(e, o.keyPath, i);
-        }));
+        e = E({
+          config: s,
+          update: i
+        });
         break;
       default:
-        return o.type;
+        return s.type;
     }
+    t.append(e);
   }
-  return n;
-}, k = (o) => x(o).map(({ title: n, list: t, foldTitle: s }) => {
-  const i = document.createElement("setting-section");
-  n && i.setAttribute("data-title", n), i.innerHTML = `
+  return t;
+}, L = (s) => x(s).map(({ title: t, list: e, foldTitle: i }) => {
+  const o = document.createElement("setting-section");
+  t && o.setAttribute("data-title", t), o.innerHTML = `
       <setting-panel>
         <setting-list data-direction="column"></setting-list>
       </setting-panel>
     `;
-  const r = i.querySelector("setting-list");
-  s && (r?.setAttribute("is-collapsible", "true"), r?.setAttribute("data-title", s));
-  for (const l of t)
-    r?.append(E(l, o));
-  return i;
-}), L = "" + new URL("index.css", import.meta.url).href, b = window[a], S = async (o) => {
-  const e = await c.initConfig(), n = c.createDeepProxy(e, {
-    set(t, s, i) {
-      t[s] = i;
-      const r = JSON.parse(JSON.stringify(n));
-      return c.updateConfig(r), o?.(r), !0;
+  const r = o.querySelector("setting-list");
+  i && (r?.setAttribute("is-collapsible", "true"), r?.setAttribute("data-title", i));
+  for (const l of e)
+    r?.append(k(l, s));
+  return o;
+}), S = "" + new URL("index.css", import.meta.url).href, A = window[a], P = async (s) => {
+  const n = await c.initConfig(), t = c.createDeepProxy(n, {
+    set(e, i, o) {
+      e[i] = o;
+      const r = JSON.parse(JSON.stringify(t));
+      return c.updateConfig(r), s?.(r), !0;
     }
   });
-  return n;
+  return t;
 };
-class A extends HTMLElement {
+class T extends HTMLElement {
   async connectedCallback() {
-    const e = this.attachShadow({ mode: "open" }), n = document.createElement("link");
-    n.rel = "stylesheet", n.href = L, e.append(n);
-    const t = await S((s) => {
-      b.configUpdate(s), new BroadcastChannel(a).postMessage(s);
+    const n = this.attachShadow({ mode: "open" }), t = document.createElement("link");
+    t.rel = "stylesheet", t.href = S, n.append(t);
+    const e = await P((i) => {
+      A.configUpdate(i), new BroadcastChannel(a).postMessage(i);
     });
-    e.append(...k(t));
+    n.append(...L(e));
   }
 }
-customElements.define(a, A);
-const P = (o) => {
-  o.innerHTML = `<${a}></${a}>`;
+customElements.define(a, T);
+const M = (s) => {
+  s.innerHTML = `<${a}></${a}>`;
 };
 export {
-  P as onSettingWindowCreated
+  M as onSettingWindowCreated
 };
