@@ -27,8 +27,16 @@ const createResponsiveConfig = async (onUpdate?: (responsiveConfig: ConfigType) 
 
 class ConfigElement extends HTMLElement {
   async connectedCallback() {
-    // 每次配置更新后通知主线程和渲染线程
+    const shadow = this.attachShadow({ mode: 'open' })
+
+    // CSS
+    const linkEl = document.createElement('link')
+    linkEl.rel = 'stylesheet'
+    linkEl.href = styleUrl
+    shadow.append(linkEl)
+
     const responsiveConfig = await createResponsiveConfig((config) => {
+      // 每次配置更新后通知主线程和渲染线程
       contextBridgeApi.configUpdate(config)
 
       // BroadcastChannel 用于通知渲染层
@@ -37,13 +45,7 @@ class ConfigElement extends HTMLElement {
     })
 
     // 添加页面
-    const shadow = this.attachShadow({ mode: 'open' })
     shadow.append(...createConfigViewList(responsiveConfig))
-
-    const linkEl = document.createElement('link')
-    linkEl.rel = 'stylesheet'
-    linkEl.href = styleUrl
-    shadow.append(linkEl)
   }
 }
 customElements.define(slug, ConfigElement)

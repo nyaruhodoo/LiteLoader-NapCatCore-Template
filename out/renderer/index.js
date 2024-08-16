@@ -58,9 +58,6 @@ class c {
       }
     return t;
   }
-  static {
-    this.updateEventName = `${u.slug}ConfigUpdate`;
-  }
   /**
    * 带有插件标识的Log
    */
@@ -186,12 +183,12 @@ const x = (o) => [
 };
 class A extends HTMLElement {
   async connectedCallback() {
-    const e = await S((s) => {
+    const e = this.attachShadow({ mode: "open" }), n = document.createElement("link");
+    n.rel = "stylesheet", n.href = L, e.append(n);
+    const t = await S((s) => {
       b.configUpdate(s), new BroadcastChannel(a).postMessage(s);
-    }), n = this.attachShadow({ mode: "open" });
-    n.append(...k(e));
-    const t = document.createElement("link");
-    t.rel = "stylesheet", t.href = L, n.append(t);
+    });
+    e.append(...k(t));
   }
 }
 customElements.define(a, A);
