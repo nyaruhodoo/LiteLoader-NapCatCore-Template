@@ -35,6 +35,7 @@ class ConfigElement extends HTMLElement {
     linkEl.href = styleUrl
     shadow.append(linkEl)
 
+    // 添加页面
     const responsiveConfig = await createResponsiveConfig((config) => {
       // 每次配置更新后通知主线程和渲染线程
       contextBridgeApi.configUpdate(config)
@@ -43,8 +44,6 @@ class ConfigElement extends HTMLElement {
       const bc = new BroadcastChannel(slug)
       bc.postMessage(config)
     })
-
-    // 添加页面
     shadow.append(...createConfigViewList(responsiveConfig))
   }
 }
