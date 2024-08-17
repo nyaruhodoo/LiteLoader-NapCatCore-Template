@@ -3,8 +3,8 @@ import { eventEmitter } from '@/main/eventEmitter'
 import { Events } from './enum/eventsEnum'
 ;(async () => {
   const NTCore = await hookWrapper({
-    log: false,
-    eventBlacklist: [Events.sendLog, Events.requestTianshuAdv],
+    log: true,
+    eventBlacklist: [Events.sendLog, Events.requestTianshuAdv, Events.onUnitedConfigUpdate],
     waitLogin: true,
     eventEmitter
   })

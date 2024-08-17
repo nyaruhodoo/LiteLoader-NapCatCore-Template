@@ -24,5 +24,8 @@ export enum Events {
   // 收到新消息后的系统通知
   onRecentContactNotification = 'NodeIKernelRecentContactListener.onRecentContactNotification',
   // 未读消息更新
-  onContactUnreadCntUpdate = 'NodeIKernelMsgListener.onContactUnreadCntUpdate'
+  onContactUnreadCntUpdate = 'NodeIKernelMsgListener.onContactUnreadCntUpdate',
+
+  // 检测更新
+  onUnitedConfigUpdate = `NodeIKernelUnitedConfigListener.onUnitedConfigUpdate`
 }
