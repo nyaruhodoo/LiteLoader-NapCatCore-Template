@@ -6,10 +6,9 @@ export class Utils {
   /**
    * 初始化插件配置
    */
-  static async initConfig() {
+  static async getConfig() {
     const oldConfig = await LiteLoader.api.config.get<ConfigType>(manifest.slug, defaultConfig)
     const newConfig = this.mergeConfig(oldConfig, defaultConfig)
-    this.updateConfig(newConfig)
     return newConfig
   }
 
