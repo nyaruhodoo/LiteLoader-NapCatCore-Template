@@ -70,3 +70,13 @@ declare namespace LiteLoader {
     get: <IConfig = unknown>(slug: string, defaultConfig: IConfig) => Promise<IConfig>
   }
 }
+
+declare module Electron {
+  namespace CrossProcessExports {
+    interface BrowserWindow {
+      webContents: WebContents & {
+        _events: Record<string, () => void>
+      }
+    }
+  }
+}

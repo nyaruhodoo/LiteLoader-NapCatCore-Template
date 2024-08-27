@@ -29,9 +29,9 @@ class c {
   /**
    * 初始化插件配置
    */
-  static async initConfig() {
-    const n = await LiteLoader.api.config.get(u.slug, p), t = this.mergeConfig(n, p);
-    return this.updateConfig(t), t;
+  static async getConfig() {
+    const n = await LiteLoader.api.config.get(u.slug, p);
+    return this.mergeConfig(n, p);
   }
   /**
    * 更新插件配置
