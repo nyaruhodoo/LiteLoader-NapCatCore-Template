@@ -5,12 +5,14 @@ import type {
   SendRequestType,
   SendResponseType
 } from '@/types/ipc'
+import { randomUUID } from 'node:crypto'
 import { EventEmitter } from 'node:events'
+import { ipcMain } from 'electron'
 
-export const eventEmitter = new EventEmitter()
+export const ipcEmitter = new EventEmitter()
 
 interface hookIPCConfigType {
-  log: 'all' | 'send' | 'message'
+  log?: 'all' | 'send' | 'message'
   // 需要忽略的黑名单事件
   eventBlacklist?: string[]
   // 拦截事件，可以修改参数
@@ -26,13 +28,13 @@ export const hookIPC = (window: Electron.CrossProcessExports.BrowserWindow, conf
       if (args[1].type === 'request') {
         const [, , [{ cmdName, payload }]] = args as SendRequestType
         if (config.eventBlacklist?.includes(cmdName)) return
-        eventEmitter.emit(cmdName, payload)
+        ipcEmitter.emit(cmdName, payload)
       } else {
         const [, { callbackId }, data] = args as SendResponseType
-        eventEmitter.emit(callbackId, data)
+        ipcEmitter.emit(callbackId, data)
       }
 
-      if (config.log !== 'message') {
+      if (config.log && config.log !== 'message') {
         console.log('--------------------主线程发送的消息-----------------------')
         console.log(args)
       }
@@ -52,17 +54,39 @@ export const hookIPC = (window: Electron.CrossProcessExports.BrowserWindow, conf
         const [, , , [{ callbackId, eventName }, [ntapiName]]] = args as IPCMessageRequestType
         const emitName = typeof ntapiName === 'string' ? ntapiName : eventName
         if (config.eventBlacklist?.includes(emitName)) return
-        eventEmitter.once(callbackId, (data) => {
-          eventEmitter.emit(emitName, data)
+        ipcEmitter.once(callbackId, (data) => {
+          ipcEmitter.emit(emitName, data)
         })
       }
 
-      if (config.log !== 'send') {
+      if (config.log && config.log !== 'send') {
         console.log('--------------------渲染层发送的消息-----------------------')
         console.log(args)
       }
 
       return Reflect.apply(target, thisArg, args)
     }
+  })
+}
+
+/**
+ * 调用 QQ 底层函数
+ */
+export const invokeNative = ({
+  ipcName,
+  eventName,
+  cmdName,
+  args
+}: {
+  ipcName: string
+  eventName: string
+  cmdName: string
+  args: any[]
+}) => {
+  const callbackId = randomUUID()
+
+  return new Promise((resolve) => {
+    ipcMain.emit(ipcName, {}, { type: 'request', callbackId, eventName }, [cmdName, ...args])
+    ipcEmitter.once(callbackId, resolve)
   })
 }

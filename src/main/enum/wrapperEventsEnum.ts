@@ -1,4 +1,4 @@
-export enum Events {
+export const enum WrapperEvents {
   // QQ的日志
   sendLog = 'NodeIQQNTWrapperSession.getNodeMiscService.sendLog',
 

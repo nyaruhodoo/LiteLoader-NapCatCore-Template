@@ -1,11 +1,11 @@
 import { hookWrapper } from '@/main/hook/hookWrapper'
 import { eventEmitter } from '@/main/eventEmitter'
-import { Events } from './enum/eventsEnum'
-import { hookIPC } from './hook/hookIPC'
+import { WrapperEvents } from './enum/wrapperEventsEnum'
+import { hookIPC, ipcEmitter } from './hook/hookIPC'
 ;(async () => {
   const NTCore = await hookWrapper({
     log: false,
-    eventBlacklist: [Events.sendLog, Events.requestTianshuAdv, Events.onUnitedConfigUpdate],
+    eventBlacklist: [WrapperEvents.sendLog, WrapperEvents.requestTianshuAdv, WrapperEvents.onUnitedConfigUpdate],
     waitLogin: true,
     eventEmitter
   })
@@ -19,3 +19,7 @@ exports.onBrowserWindowCreated = (window) => {
     log: 'all'
   })
 }
+
+ipcEmitter.addListener('nodeIKernelMsgListener/onRecvActiveMsg', () => {
+  // console.log(data)
+})
