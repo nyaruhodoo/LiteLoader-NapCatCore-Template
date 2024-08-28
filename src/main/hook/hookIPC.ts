@@ -10,13 +10,14 @@ import { EventEmitter } from 'node:events'
 import { ipcMain } from 'electron'
 
 export const ipcEmitter = new EventEmitter()
+const callbackMap = new Map<string, string>()
 
 interface hookIPCConfigType {
   log?: 'all' | 'send' | 'message'
   // 需要忽略的黑名单事件
   eventBlacklist?: string[]
   // 拦截事件，可以修改参数
-  eventInterceptors?: Record<string, (params: any[]) => any[]>
+  eventInterceptors?: Record<string, (args: any) => any>
 }
 
 export const hookIPC = (window: Electron.CrossProcessExports.BrowserWindow, config: hookIPCConfigType) => {
@@ -25,13 +26,24 @@ export const hookIPC = (window: Electron.CrossProcessExports.BrowserWindow, conf
       const [ipcName] = args
       if (!ipcName.includes('IPC')) return Reflect.apply(target, thisArg, args)
 
+      let hookArgs: SendArgsType | undefined
+
       if (args[1].type === 'request') {
         const [, , [{ cmdName, payload }]] = args as SendRequestType
         if (config.eventBlacklist?.includes(cmdName)) return
-        ipcEmitter.emit(cmdName, payload)
+        hookArgs = config.eventInterceptors?.[cmdName](args)
+        const hookPayload = (hookArgs as SendRequestType | undefined)?.[2][0].payload
+        ipcEmitter.emit(cmdName, hookPayload ?? payload)
       } else {
         const [, { callbackId }, data] = args as SendResponseType
-        ipcEmitter.emit(callbackId, data)
+        const responseEventName = callbackMap.get(callbackId)
+        if (responseEventName && config.eventInterceptors?.[responseEventName]) {
+          callbackMap.delete(callbackId)
+          hookArgs = config.eventInterceptors?.[responseEventName](args)
+        }
+        const hookData = (hookArgs as SendResponseType | undefined)?.[2]
+
+        ipcEmitter.emit(callbackId, hookData ?? data)
       }
 
       if (config.log && config.log !== 'message') {
@@ -39,21 +51,23 @@ export const hookIPC = (window: Electron.CrossProcessExports.BrowserWindow, conf
         console.log(args)
       }
 
-      return Reflect.apply(target, thisArg, args)
+      return Reflect.apply(target, thisArg, hookArgs ?? args)
     }
   })
 
   window.webContents._events['-ipc-message'] = new Proxy(window.webContents._events['-ipc-message'], {
     apply(target, thisArg, args: IPCMessageArgsType) {
       const [, , , [{ type, eventName }]] = args
-
       // 默认屏蔽log
       if (eventName.includes('ns-LoggerApi')) return
+      let hookArgs: IPCMessageArgsType | undefined
 
       if (type === 'request') {
         const [, , , [{ callbackId, eventName }, [ntapiName]]] = args as IPCMessageRequestType
         const emitName = typeof ntapiName === 'string' ? ntapiName : eventName
         if (config.eventBlacklist?.includes(emitName)) return
+        callbackMap.set(callbackId, emitName)
+        hookArgs = config.eventInterceptors?.[emitName](args)
         ipcEmitter.once(callbackId, (data) => {
           ipcEmitter.emit(emitName, data)
         })
@@ -64,7 +78,7 @@ export const hookIPC = (window: Electron.CrossProcessExports.BrowserWindow, conf
         console.log(args)
       }
 
-      return Reflect.apply(target, thisArg, args)
+      return Reflect.apply(target, thisArg, hookArgs ?? args)
     }
   })
 }
@@ -73,20 +87,22 @@ export const hookIPC = (window: Electron.CrossProcessExports.BrowserWindow, conf
  * 调用 QQ 底层函数
  */
 export const invokeNative = ({
-  ipcName,
+  ipcName = 'IPC_UP_2',
   eventName,
+  eventType = 'requert',
   cmdName,
   args
 }: {
   ipcName: string
   eventName: string
+  eventType: 'requert' | 'response'
   cmdName: string
   args: any[]
 }) => {
   const callbackId = randomUUID()
 
   return new Promise((resolve) => {
-    ipcMain.emit(ipcName, {}, { type: 'request', callbackId, eventName }, [cmdName, ...args])
+    ipcMain.emit(ipcName, {}, { type: eventType, callbackId, eventName }, [cmdName, ...args])
     ipcEmitter.once(callbackId, resolve)
   })
 }

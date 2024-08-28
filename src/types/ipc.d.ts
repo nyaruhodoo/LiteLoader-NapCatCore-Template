@@ -1,4 +1,4 @@
-type SendRequestType = [
+type SendRequestType<T = any> = [
   string,
   {
     type: 'request'
@@ -8,11 +8,11 @@ type SendRequestType = [
     {
       cmdName: string
       cmdType: string
-      payload: any
+      payload: T
     }
   ]
 ]
-type SendResponseType = [
+type SendResponseType<T = any> = [
   string,
   {
     callbackId: string
@@ -20,12 +20,12 @@ type SendResponseType = [
     type: 'response'
     eventName: string
   },
-  any
+  T
 ]
 
 export type SendArgsType = SendRequestType | SendResponseType
 
-type IPCMessageRequestType = [
+type IPCMessageRequestType<T = [...any]> = [
   {
     frameId: number
     processId: number
@@ -38,14 +38,14 @@ type IPCMessageRequestType = [
       callbackId: string
       eventName: string
     },
-    [string?, ...any]
+    [string?, ...T]
   ]
 ]
-type IPCMessageResponseType = [
+type IPCMessageResponseType<T = any> = [
   IPCMessageRequestType[0],
   IPCMessageRequestType[1],
   IPCMessageRequestType[2],
-  [SendResponseType[1], any]
+  [SendResponseType[1], T]
 ]
 
 export type IPCMessageArgsType = IPCMessageRequestType | IPCMessageResponseType
