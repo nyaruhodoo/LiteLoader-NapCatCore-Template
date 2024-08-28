@@ -1,6 +1,6 @@
 import { hookWrapper } from '@/main/hook/hookWrapper'
 import { WrapperEvents } from './enum/wrapperEventsEnum'
-import { hookIPC, ipcEmitter } from './hook/hookIPC'
+import { hookIPC } from './hook/hookIPC'
 ;(async () => {
   const NTCore = await hookWrapper({
     log: false,
@@ -17,7 +17,3 @@ exports.onBrowserWindowCreated = (window) => {
     log: 'all'
   })
 }
-
-ipcEmitter.addListener('nodeIKernelMsgListener/onRecvActiveMsg', () => {
-  // console.log(data)
-})
