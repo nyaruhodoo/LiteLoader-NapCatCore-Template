@@ -57,13 +57,14 @@ export const hookIPC = (window: Electron.CrossProcessExports.BrowserWindow, conf
 
   window.webContents._events['-ipc-message'] = new Proxy(window.webContents._events['-ipc-message'], {
     apply(target, thisArg, args: IPCMessageArgsType) {
-      const [, , , [{ type, eventName }]] = args
-      // 默认屏蔽log
-      if (eventName.includes('ns-LoggerApi')) return
+      const [, , , [{ type }]] = args
+
       let hookArgs: IPCMessageArgsType | undefined
 
       if (type === 'request') {
         const [, , , [{ callbackId, eventName }, [ntapiName]]] = args as IPCMessageRequestType
+        // 默认屏蔽log
+        if (eventName.includes('ns-LoggerApi')) return
         const emitName = typeof ntapiName === 'string' ? ntapiName : eventName
         if (config.eventBlacklist?.includes(emitName)) return
         callbackMap.set(callbackId, emitName)
