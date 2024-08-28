@@ -1,7 +1,8 @@
-import type { EventEmitter } from 'node:events'
+import { EventEmitter } from 'node:events'
 import type { NTWrapperNodeApi, NodeIKernelLoginService } from 'napcat.core'
 import Process from 'node:process'
 import { LoginListener, NTCoreWrapper } from 'napcat.core'
+export const eventEmitter = new EventEmitter()
 
 interface hookWarpperConfigType {
   // 是否打印日志
@@ -10,8 +11,6 @@ interface hookWarpperConfigType {
   eventBlacklist?: string[]
   // 拦截事件，可以修改参数
   eventInterceptors?: Record<string, (params: any[]) => any[]>
-  // 如果指定独立的 eventEmitter 则会额外派发事件
-  eventEmitter?: EventEmitter
   // 内置的事件监听器
   eventListeners?: Record<string, (event: { ret: any; params: any[] }) => void>
   // 是否等待登录
@@ -69,7 +68,6 @@ const hookInstance = ({
   log,
   eventBlacklist,
   eventListeners,
-  eventEmitter,
   eventInterceptors
 }: {
   instance: object
@@ -122,8 +120,7 @@ const hookInstance = ({
           log,
           eventBlacklist,
           eventListeners,
-          eventInterceptors,
-          eventEmitter
+          eventInterceptors
         })
       }
 
@@ -185,7 +182,6 @@ export const hookWrapper = (config: hookWarpperConfigType): Promise<NTCoreWrappe
                     log: config.log,
                     eventBlacklist: config.eventBlacklist,
                     eventListeners: config.eventListeners,
-                    eventEmitter: config.eventEmitter,
                     eventInterceptors: config.eventInterceptors
                   }
 
