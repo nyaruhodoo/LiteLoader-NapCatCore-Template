@@ -20,7 +20,7 @@ interface hookIPCConfigType {
   eventInterceptors?: Record<string, (args: any) => any>
 }
 
-export const hookIPC = (window: Electron.CrossProcessExports.BrowserWindow, config: hookIPCConfigType) => {
+export const hookIPC = (window: Electron.CrossProcessExports.BrowserWindow, config?: hookIPCConfigType) => {
   window.webContents.send = new Proxy(window.webContents.send, {
     apply(target, thisArg, args: SendArgsType) {
       const [ipcName] = args
@@ -30,23 +30,23 @@ export const hookIPC = (window: Electron.CrossProcessExports.BrowserWindow, conf
 
       if (args[1].type === 'request') {
         const [, , [{ cmdName, payload }]] = args as SendRequestType
-        if (config.eventBlacklist?.includes(cmdName)) return
-        hookArgs = config.eventInterceptors?.[cmdName](args)
+        if (config?.eventBlacklist?.includes(cmdName)) return
+        hookArgs = config?.eventInterceptors?.[cmdName](args)
         const hookPayload = (hookArgs as SendRequestType | undefined)?.[2][0].payload
         ipcEmitter.emit(cmdName, hookPayload ?? payload)
       } else {
         const [, { callbackId }, data] = args as SendResponseType
         const responseEventName = callbackMap.get(callbackId)
-        if (responseEventName && config.eventInterceptors?.[responseEventName]) {
+        if (responseEventName && config?.eventInterceptors?.[responseEventName]) {
           callbackMap.delete(callbackId)
-          hookArgs = config.eventInterceptors?.[responseEventName](args)
+          hookArgs = config?.eventInterceptors?.[responseEventName](args)
         }
         const hookData = (hookArgs as SendResponseType | undefined)?.[2]
 
         ipcEmitter.emit(callbackId, hookData ?? data)
       }
 
-      if (config.log && config.log !== 'message') {
+      if (config?.log && config?.log !== 'message') {
         console.log('--------------------主线程发送的消息-----------------------')
         console.log(args)
       }
@@ -66,15 +66,15 @@ export const hookIPC = (window: Electron.CrossProcessExports.BrowserWindow, conf
         // 默认屏蔽log
         if (eventName.includes('ns-LoggerApi')) return
         const emitName = typeof ntapiName === 'string' ? ntapiName : eventName
-        if (config.eventBlacklist?.includes(emitName)) return
+        if (config?.eventBlacklist?.includes(emitName)) return
         callbackMap.set(callbackId, emitName)
-        hookArgs = config.eventInterceptors?.[emitName](args)
+        hookArgs = config?.eventInterceptors?.[emitName](args)
         ipcEmitter.once(callbackId, (data) => {
           ipcEmitter.emit(emitName, data)
         })
       }
 
-      if (config.log && config.log !== 'send') {
+      if (config?.log && config?.log !== 'send') {
         console.log('--------------------渲染层发送的消息-----------------------')
         console.log(args)
       }

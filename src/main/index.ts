@@ -13,7 +13,5 @@ import { hookIPC } from './hook/hookIPC'
 })()
 
 exports.onBrowserWindowCreated = (window: Electron.CrossProcessExports.BrowserWindow) => {
-  hookIPC(window, {
-    log: 'all'
-  })
+  hookIPC(window)
 }
