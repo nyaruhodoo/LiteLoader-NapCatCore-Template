@@ -12,7 +12,7 @@ import { hookIPC } from './hook/hookIPC'
   NTCore
 })()
 
-exports.onBrowserWindowCreated = (window) => {
+exports.onBrowserWindowCreated = (window: Electron.CrossProcessExports.BrowserWindow) => {
   hookIPC(window, {
     log: 'all'
   })
