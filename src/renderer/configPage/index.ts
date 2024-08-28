@@ -11,7 +11,7 @@ const contextBridgeApi: ContextBridgeApiType = window[slug]
  * 生成响应式配置对象
  */
 const createResponsiveConfig = async (onUpdate?: (responsiveConfig: ConfigType) => void) => {
-  const config = await Utils.initConfig()
+  const config = await Utils.getConfig()
   const responsiveConfig = Utils.createDeepProxy<ConfigType>(config, {
     set(target, prop, val) {
       target[prop as string] = val

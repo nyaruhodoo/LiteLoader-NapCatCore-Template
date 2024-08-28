@@ -192,7 +192,7 @@ const x = (s) => [
     r?.append(k(l, s));
   return o;
 }), S = "" + new URL("index.css", import.meta.url).href, A = window[a], P = async (s) => {
-  const n = await c.initConfig(), t = c.createDeepProxy(n, {
+  const n = await c.getConfig(), t = c.createDeepProxy(n, {
     set(e, i, o) {
       e[i] = o;
       const r = JSON.parse(JSON.stringify(t));
