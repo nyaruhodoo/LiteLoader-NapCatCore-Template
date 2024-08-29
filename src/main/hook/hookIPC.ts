@@ -87,23 +87,21 @@ export const hookIPC = (window: Electron.CrossProcessExports.BrowserWindow, conf
 /**
  * 调用 QQ 底层函数
  */
-export const invokeNative = ({
+export const invokeNative = <T = unknown>({
   ipcName = 'IPC_UP_2',
-  eventName,
-  eventType = 'requert',
+  eventName = 'ns-ntApi-2',
   cmdName,
   args
 }: {
-  ipcName: string
-  eventName: string
-  eventType: 'requert' | 'response'
+  ipcName?: string
+  eventName?: string
   cmdName: string
   args: any[]
-}) => {
+}): Promise<{ result: number; errMsg: string } & T> => {
   const callbackId = randomUUID()
 
   return new Promise((resolve) => {
-    ipcMain.emit(ipcName, {}, { type: eventType, callbackId, eventName }, [cmdName, ...args])
+    ipcMain.emit(ipcName, {}, { type: 'request', callbackId, eventName }, [cmdName, ...args])
     ipcEmitter.once(callbackId, resolve)
   })
 }
