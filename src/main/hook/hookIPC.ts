@@ -37,9 +37,9 @@ export const hookIPC = (window: Electron.CrossProcessExports.BrowserWindow, conf
       } else {
         const [, { callbackId }, data] = args as SendResponseType
         const responseEventName = callbackMap.get(callbackId)
-        if (responseEventName && config?.eventInterceptors?.[responseEventName]) {
-          callbackMap.delete(callbackId)
-          hookArgs = config?.eventInterceptors?.[responseEventName](args)
+        callbackMap.delete(callbackId)
+        if (responseEventName && config?.eventInterceptors?.[`${responseEventName}:response`]) {
+          hookArgs = config?.eventInterceptors?.[`${responseEventName}:response`](args)
         }
         const hookData = (hookArgs as SendResponseType | undefined)?.[2]
 
