@@ -1,4 +1,6 @@
-export const enum WrapperEvents {
+export const enum EventEnum {
+  //----------------- * Wrapper 部分 * -----------------
+
   // QQ的日志
   sendLog = 'NodeIQQNTWrapperSession.getNodeMiscService.sendLog',
 
@@ -18,5 +20,10 @@ export const enum WrapperEvents {
   onRecvMsg = 'NodeIKernelMsgListener.onRecvMsg',
 
   // 检测更新
-  onUnitedConfigUpdate = `NodeIKernelUnitedConfigListener.onUnitedConfigUpdate`
+  onUnitedConfigUpdate = `NodeIKernelUnitedConfigListener.onUnitedConfigUpdate`,
+
+  //----------------- * IPC 部分 * -----------------
+
+  // 收到新消息(只会收到已激活窗口消息)
+  onRecvActiveMsg = 'nodeIKernelMsgListener/onRecvActiveMsg'
 }

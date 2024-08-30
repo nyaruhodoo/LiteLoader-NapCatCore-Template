@@ -1,17 +1,12 @@
 import { hookWrapper } from '@/main/hook/hookWrapper'
-import { WrapperEvents } from './enum/wrapperEventsEnum'
 import { hookIPC } from './hook/hookIPC'
-;(async () => {
-  const NTCore = await hookWrapper({
-    log: false,
-    eventBlacklist: [WrapperEvents.sendLog, WrapperEvents.requestTianshuAdv, WrapperEvents.onUnitedConfigUpdate],
-    waitLogin: true
-  })
 
-  // 做你想做的事...
-  NTCore
+// 用于初始化 NTcore
+;(async () => {
+  await hookWrapper()
 })()
 
+// hookIPC 必须在这里调用
 exports.onBrowserWindowCreated = (window: Electron.CrossProcessExports.BrowserWindow) => {
   hookIPC(window)
 }

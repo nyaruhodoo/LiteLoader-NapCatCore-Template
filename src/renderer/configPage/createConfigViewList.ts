@@ -1,5 +1,5 @@
 import type { ConfigType } from '@/defaultConfig'
-import { createConfigViewConfig } from './createConfigViewConfig'
+import { createConfigViewConfig } from './config'
 import { createConfigViewItem } from './createConfigViewitem'
 
 /**

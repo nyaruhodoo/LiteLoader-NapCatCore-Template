@@ -1,5 +1,5 @@
 import type { ConfigType } from '@/defaultConfig'
-import type { ConfigItemType } from './createConfigViewConfig'
+import type { ConfigItemType } from './config'
 import { Utils } from '@/utils'
 import { Input } from './components/input'
 import { SettingSwitch } from './components/settingSwitch'

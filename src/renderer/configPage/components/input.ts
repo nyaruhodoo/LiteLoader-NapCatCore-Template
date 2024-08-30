@@ -1,4 +1,4 @@
-import type { ConfigItemType } from '../createConfigViewConfig'
+import type { ConfigItemType } from '../config'
 
 export const Input = ({
   config,
