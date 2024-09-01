@@ -1,7 +1,23 @@
 # 写在最前
 
-由于官方针对 Hook Wrapper 的围堵，**9.9.15-26909** 是最后一个可用的版本  
-如果你喜欢该模板那么可以去除掉相关调用，待我有空时我会替换为 Hook IPC 版本，所以影响不是很大
+由于忙着玩黑神话，近期才抽出时间来修改模板  
+测试版本 **9.9.15-27597**
+
+由于 26909 版本后 wrapper 有很大改动，导致该模板并不能同时支持之前版本  
+并且由于 NapCatCore 已被入土，在使用时难免会遇到一些不如意的问题
+
+不过你也不用太过担心，实际上本项目与 NapCatCore 并不具备什么依赖性  
+引入它的目的只是为了有个好心人帮我们整理 API 以及相关参数，让我举个小栗子
+
+```ts
+// 如果 NTcore 中有这个API，那么你就可开心的直接调用
+const { result, errMsg, grabRedBagRsp } = await getNTcore().ApiMsg.grabRedBag()
+
+// 如果因为版本问题出现不兼容，你也可以直接引用 session 自行处理，自己做好类型支持就是了
+const { result, errMsg, grabRedBagRsp } = await getNTcore().session.getMsgService().grabRedBag()
+```
+
+~~虽然也不是不可以我去维护 NapCatCore，可我自身已经没什么开发插件的需求了~~
 
 # LiteLoader-NapCatCore-Template
 
@@ -10,7 +26,7 @@
 当前提供的功能如下
 
 - 快速创建插件配置页面
-- 默认 Hook Wrapper ，创建 NTCore 实例
+- 提供 Hook Wrapper / Hook IPC (侵入性那是相当强，从头 hook 到脚)
 
 ## 待办事项
 
@@ -28,31 +44,51 @@
 ### Hook Wrapper
 
 可以先了解下 [NapCatCore](https://github.com/NapNeko/LiteLoader-NapCatCore)  
-该模板并不只是单纯的创建了 `NTCore` 实例，而是对 Wrapper 中的函数都进行了一层拦截用于做到更多事情，比如拦截事件、额外的 eventEmitter  
-如果你不喜欢可以参考 [NapCatExample](https://github.com/NapNeko/LiteLoader-NapCatExample) 使用非侵入式的方式创建 NTCore  
+该模板并不只是单纯的创建了 `NTCore` 实例，而是对 Wrapper 中的函数都进行了一层拦截用于做到更多事情，比如拦截事件、额外的 `eventEmitter`  
+~~如果你不喜欢可以参考 [NapCatExample](https://github.com/NapNeko/LiteLoader-NapCatExample) 使用非侵入式的方式创建 NTCore~~  
 ~~我不觉得会有很大区别就是了~~
+
+`hookWrapper` 支持的参数也非常有限，本该做的拦截器目前还没加(会尽快)
 
 ```ts
 interface hookWarpperConfigType {
   // 是否打印日志
-  log: boolean
+  log?: boolean
   // 需要忽略的黑名单事件
   eventBlacklist?: string[]
-  // 拦截事件，可以修改参数
-  eventInterceptors?: Record<string, (params: any[]) => any[]>
-  // 如果指定独立的 eventEmitter 则会额外派发事件
-  eventEmitter?: EventEmitter
-  // 内置的事件监听器
-  eventListeners?: Record<string, (event: { ret: any; params: any[] }) => void>
-  // 是否等待登录
-  waitLogin?: boolean
 }
 ```
 
-`hookWrapper` 提供的参数也非常有限，需要注意的是 `waitLogin` 以及事件名  
-`NTCore` 中的大多数 API 都需要登陆后才可调用，一些工具类则没有这个要求，所以通常情况下建议配置 `waitLogin` 为 `true`，监听登录的方式还有很多，比如 LL 就提供了 `onLogin` 函数，我想应该可以满足你的特殊需求
+当你使用内置的 `wrapperEmitter` 时，需要注意事件名，其实开启 `log` 功能打印下你就知道我所说的是什么了  
+另一个注意的点是 NapCatCore 中的大多数 API 都需要登陆后调用，所以默认会等待登录，你的插件逻辑最好也在 `await` 之后执行
 
-至于事件名你可以参考 `eventsEnum` 会从父级拼接到子级，你可以开启 `log` 功能，打印什么名字复制什么名字就是
+```ts
+;(async () => {
+  await hookWrapper({
+    eventBlacklist: [EventEnum.sendLog]
+  })
+
+  initXXX()
+})()
+```
+
+### Hook IPC
+
+提供的参数和 wrapper 很类似，都可以做到对某个事件的中断以及参数修改
+
+```ts
+interface hookIPCConfigType {
+  log?: 'all' | 'send' | 'message'
+  // 需要忽略的黑名单事件
+  eventBlacklist?: string[]
+  // 拦截事件，可以修改参数
+  eventInterceptors?: Record<string, (args: any) => any>
+}
+```
+
+`eventInterceptors` 中的事件名你同样可以通过开启 `log` 来查看，需要注意的是当你拦截 `response` 时事件名需要写 `xxx:response`
+
+`Hook IPC` 与 `Hook Wrapper` 可以共存，但因提供的功能比较类似还是只推荐使用其一
 
 ### 修改 manifest & defaultConfig & createConfigViewConfig
 
@@ -79,7 +115,7 @@ bc.addEventListener('message', (event) => {
 
 ### 新旧配置合并策略
 
-在调用 `Utils.initConfig` 时，会基于当前 `defaultConfig` 与用户的本地配置进行一次深度合并
+在调用 `Utils.getConfig` 时，会基于当前 `defaultConfig` 与用户的本地配置进行一次深度合并
 
 ```ts
 static mergeConfig(oldConfig: Record<string, any>, newConfig: ConfigType) {
@@ -107,8 +143,6 @@ static mergeConfig(oldConfig: Record<string, any>, newConfig: ConfigType) {
     return targetObj
   }
 ```
-
-我想看源码比我打字应该更好理解一些
 
 ## 构建相关
 
