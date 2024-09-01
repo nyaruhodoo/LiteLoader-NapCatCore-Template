@@ -138,8 +138,9 @@ export invokeNative
   },
   // 只需关注这里即可，代表的是返回值
   true
-][
-  // 主线程除了会发送 response 也会发送 request 类型事件
+]
+// 主线程除了会发送 response 也会发送 request 类型事件
+;[
   ('IPC_DOWN_2',
   { type: 'request', eventName: 'ns-ntApi-2' },
   [
