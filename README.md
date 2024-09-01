@@ -48,19 +48,25 @@ const { result, errMsg, grabRedBagRsp } = await getNTcore().session.getMsgServic
 ~~如果你不喜欢可以参考 [NapCatExample](https://github.com/NapNeko/LiteLoader-NapCatExample) 使用非侵入式的方式创建 NTCore~~  
 ~~我不觉得会有很大区别就是了~~
 
-`hookWrapper` 支持的参数也非常有限，本该做的拦截器目前还没加(会尽快)
-
 ```ts
+// 参数，本该做的拦截器目前还没加(会尽快)
 interface hookWarpperConfigType {
   // 是否打印日志
   log?: boolean
   // 需要忽略的黑名单事件
   eventBlacklist?: string[]
 }
+
+// 导出模块
+export hookWrapper
+export wrapperEmitter
+export getNTcore
 ```
 
-当你使用内置的 `wrapperEmitter` 时，需要注意事件名，其实开启 `log` 功能打印下你就知道我所说的是什么了  
-另一个注意的点是 NapCatCore 中的大多数 API 都需要登陆后调用，所以默认会等待登录，你的插件逻辑最好也在 `await` 之后执行
+当你使用 `wrapperEmitter` 和 `eventBlacklist` 时，需要确认好事件名  
+我默认屏蔽了 2 个事件，结合 log 我想你很快知道如何使用
+
+另一个注意的点是 NapCatCore 中的大多数 API 都需要登陆后调用，所以 await 会去等待登录后才执行
 
 ```ts
 ;(async () => {
@@ -68,7 +74,7 @@ interface hookWarpperConfigType {
     eventBlacklist: [EventEnum.sendLog]
   })
 
-  initXXX()
+  // 做你该做的事
 })()
 ```
 
@@ -77,6 +83,7 @@ interface hookWarpperConfigType {
 提供的参数和 wrapper 很类似，都可以做到对某个事件的中断以及参数修改
 
 ```ts
+// 参数
 interface hookIPCConfigType {
   log?: 'all' | 'send' | 'message'
   // 需要忽略的黑名单事件
@@ -84,9 +91,70 @@ interface hookIPCConfigType {
   // 拦截事件，可以修改参数
   eventInterceptors?: Record<string, (args: any) => any>
 }
+
+// 导出模块
+export hookIPC
+export ipcEmitter
+export invokeNative
 ```
 
-`eventInterceptors` 中的事件名你同样可以通过开启 `log` 来查看，需要注意的是当你拦截 `response` 时事件名需要写 `xxx:response`
+`eventInterceptors` 和 `ipcEmitter` 中的事件名你同样可以通过开启 `log` 来查看  
+`cmdName` 和 `eventName` 均可  
+需要注意的是当你拦截 `response` 时事件名需要写 `${eventName}:response`
+
+关于 IPC 多写点好了，本来这些内容应该放到新手教程那边，但我实在是不想维护不同项目了  
+众所周知 IPC 是可以双向通信的，也就是主线程和渲染线程的通信，再举个栗子
+
+```ts
+// 此处为渲染线程向主线程 emit 的消息
+;[
+  { frameId: 1, processId: 5 },
+  false,
+  // 这里的2，代表的是qq主窗口，每个窗口都具备自己的标识ID
+  'IPC_UP_2',
+  [
+    {
+      // request 代表请求主线程去做某件事
+      type: 'request',
+      // 该id用于主线程向渲染线程发送消息时进行订阅调用结果
+      callbackId: '57ee753d-e390-46d0-b785-abff293786d4',
+      // 该参数搭配下面的 checkHasMultipleQQ 会形成一个函数的调用
+      eventName: 'ns-BusinessApi-2'
+    },
+    ['checkHasMultipleQQ']
+  ]
+]
+```
+
+```ts
+// 此处为主线程向渲染线程 send 的消息
+;[
+  'IPC_DOWN_2',
+  {
+    callbackId: '57ee753d-e390-46d0-b785-abff293786d4',
+    promiseStatue: 'full',
+    type: 'response',
+    eventName: 'ns-BusinessApi-2'
+  },
+  // 只需关注这里即可，代表的是返回值
+  true
+][
+  // 主线程除了会发送 response 也会发送 request 类型事件
+  ('IPC_DOWN_2',
+  { type: 'request', eventName: 'ns-ntApi-2' },
+  [
+    {
+      // 收到新消息时情况则会反过来，是主线程请求渲染线程去做某些事，会派发一个 cmd 事件
+      cmdName: 'nodeIKernelGroupListener/onGroupNotifiesUnreadCountUpdated',
+      cmdType: 'event',
+      // 携带参数
+      payload: []
+    }
+  ])
+]
+```
+
+具体的细节就不再过多描述，你可以直接去阅读代码
 
 `Hook IPC` 与 `Hook Wrapper` 可以共存，但因提供的功能比较类似还是只推荐使用其一
 
