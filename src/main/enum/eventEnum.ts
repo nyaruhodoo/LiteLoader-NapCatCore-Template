@@ -10,6 +10,9 @@ export const enum EventEnum {
   // 收到新消息
   onRecvMsg = 'NodeIQQNTWrapperSession/create/getMsgService/addKernelMsgListener/onRecvMsg',
 
+  // 广告?
+  requestTianshuAdv = 'NodeIQQNTWrapperSession/create/getMsgService/requestTianshuAdv',
+
   //----------------- * IPC 部分 * -----------------
 
   // 收到新消息(只会收到已激活窗口消息)
