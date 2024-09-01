@@ -7,7 +7,7 @@ export const wrapperEmitter = new EventEmitter()
 
 interface hookWarpperConfigType {
   // 是否打印日志
-  log: boolean
+  log?: boolean
   // 需要忽略的黑名单事件
   eventBlacklist?: string[]
 }
@@ -208,7 +208,7 @@ export const hookWrapper = (config?: hookWarpperConfigType): Promise<NTCoreWrapp
 
     // 等待登录
     wrapperEmitter.once(EventEnum.onQRCodeLoginSucceed, () => {
-      res(new NTCoreWrapper(NTWrapperNodeApi!, NodeIQQNTWrapperSession!))
+      res((NTcore = new NTCoreWrapper(NTWrapperNodeApi!, NodeIQQNTWrapperSession!)))
     })
   })
 }
