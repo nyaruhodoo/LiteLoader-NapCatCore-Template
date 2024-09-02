@@ -49,12 +49,14 @@ const { result, errMsg, grabRedBagRsp } = await getNTcore().session.getMsgServic
 ~~我不觉得会有很大区别就是了~~
 
 ```ts
-// 参数，本该做的拦截器目前还没加(会尽快)
+// 参数
 interface hookWarpperConfigType {
   // 是否打印日志
   log?: boolean
   // 需要忽略的黑名单事件
   eventBlacklist?: string[]
+  // 拦截事件，可以修改参数
+  eventInterceptors?: Record<string, (eventData: any) => any>
 }
 
 // 导出模块
