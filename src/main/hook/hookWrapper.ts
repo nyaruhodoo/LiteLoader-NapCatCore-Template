@@ -3,6 +3,7 @@ import type { NTWrapperNodeApi, NodeIQQNTWrapperSession } from 'napcat.core'
 import { NTCoreWrapper } from 'napcat.core'
 import Process from 'node:process'
 import { EventEnum } from '../enum/eventEnum'
+import { inspect } from 'node:util'
 export const wrapperEmitter = new EventEmitter()
 
 interface hookWarpperConfigType {
@@ -15,6 +16,16 @@ interface hookWarpperConfigType {
 }
 
 /**
+ * 用于避免多次调用 getService 造成的打印
+ */
+const serviceMap = new Map<string, boolean>()
+
+/**
+ * 配置对象
+ */
+let hookConfig: hookWarpperConfigType | undefined
+
+/**
  * 打印函数调用相关参数
  */
 const logFn = ({ argArray, ret, key }: { argArray: any[]; ret: any; key: string }) => {
@@ -23,14 +34,18 @@ const logFn = ({ argArray, ret, key }: { argArray: any[]; ret: any; key: string 
 
   console.log('-----------------------------------------------')
   console.log(`${key} 被调用`)
-  argArray.length && console.log(`参数: `, argArray)
-  console.log(`返回值: `, ret)
+  argArray.length && console.log(`参数: `, inspect(argArray, { depth: null, colors: true }))
+
+  console.log(`返回值: `, inspect(ret, { depth: null, colors: true }))
 
   if (typeof ret === 'object' && ret) {
     const retPropertyNames = Object.getOwnPropertyNames(ret)
-    retPropertyNames.length && console.log(`返回值 keys: `, retPropertyNames)
+    retPropertyNames.length && console.log(`返回值 keys: `, inspect(retPropertyNames, { depth: null, colors: true }))
 
-    console.log(`原型 keys: `, Object.getOwnPropertyNames(Object.getPrototypeOf(ret)))
+    console.log(
+      `原型 keys: `,
+      inspect(Object.getOwnPropertyNames(Object.getPrototypeOf(ret)), { depth: null, colors: true })
+    )
   }
 }
 
@@ -105,16 +120,6 @@ let NTcore: NTCoreWrapper | undefined
 
 let NodeIQQNTWrapperSession: NodeIQQNTWrapperSession | undefined
 let NTWrapperNodeApi: NTWrapperNodeApi | undefined
-
-/**
- * 用于避免多次调用 getService 造成的打印
- */
-const serviceMap = new Map<string, boolean>()
-
-/**
- * 配置对象
- */
-let hookConfig: hookWarpperConfigType | undefined
 
 /**
  * hook wrapper
