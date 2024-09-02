@@ -173,16 +173,18 @@ export const hookWrapper = (config?: hookWarpperConfigType): Promise<NTCoreWrapp
                           key
                         })
 
-                        if (key === 'NodeIQQNTWrapperSession/create') {
-                          NodeIQQNTWrapperSession = applyRet
-                        }
-
                         if (typeof applyRet !== 'object') return applyRet
 
-                        return hookInstance({
+                        const hookApplyRet = hookInstance({
                           instance: applyRet,
                           rootKey: key
                         })
+
+                        if (key === 'NodeIQQNTWrapperSession/create') {
+                          NodeIQQNTWrapperSession = hookApplyRet as NodeIQQNTWrapperSession
+                        }
+
+                        return hookApplyRet
                       }
                     })
                   },
