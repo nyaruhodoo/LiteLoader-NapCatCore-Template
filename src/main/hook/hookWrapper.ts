@@ -10,6 +10,8 @@ interface hookWarpperConfigType {
   log?: boolean
   // 需要忽略的黑名单事件
   eventBlacklist?: string[]
+  // 拦截事件，可以修改参数
+  eventInterceptors?: Record<string, (eventData: any) => any>
 }
 
 /**
@@ -58,7 +60,13 @@ const hookInstance = ({ instance, rootKey }: { instance: Record<string, any>; ro
           })
         }
 
+        // hook args
+        args = hookConfig?.eventInterceptors?.[key]?.(args) ?? args
+
         let applyRet = instance[p](...args)
+
+        // hook applyRef
+        applyRet = hookConfig?.eventInterceptors?.[`${key}:response`]?.(applyRet) ?? applyRet
 
         // Service 需要额外处理一次
         if (key.endsWith('Service')) {
@@ -68,18 +76,17 @@ const hookInstance = ({ instance, rootKey }: { instance: Record<string, any>; ro
           })
         }
 
-        logFn({
-          argArray: args,
-          ret: applyRet,
-          key: key
-        })
-
         // 额外派发事件方便监听处理
         wrapperEmitter.emit(key, {
           applyRet,
           args
         })
 
+        logFn({
+          argArray: args,
+          ret: applyRet,
+          key: key
+        })
         return applyRet
       }
     }

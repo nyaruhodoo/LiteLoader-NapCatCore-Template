@@ -17,7 +17,7 @@ interface hookIPCConfigType {
   // 需要忽略的黑名单事件
   eventBlacklist?: string[]
   // 拦截事件，可以修改参数
-  eventInterceptors?: Record<string, (args: any) => any>
+  eventInterceptors?: Record<string, (eventData: any) => any>
 }
 
 export const hookIPC = (window: Electron.CrossProcessExports.BrowserWindow, config?: hookIPCConfigType) => {

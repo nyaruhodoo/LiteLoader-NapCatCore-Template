@@ -10,6 +10,9 @@ export const enum EventEnum {
   // 收到新消息
   onRecvMsg = 'NodeIQQNTWrapperSession/create/getMsgService/addKernelMsgListener/onRecvMsg',
 
+  // 发送消息
+  sendMsg = 'NodeIQQNTWrapperSession/create/getMsgService/sendMsg',
+
   // 广告?
   requestTianshuAdv = 'NodeIQQNTWrapperSession/create/getMsgService/requestTianshuAdv',
 
