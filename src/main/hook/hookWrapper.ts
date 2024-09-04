@@ -49,8 +49,6 @@ const logFn = ({ argArray, ret, key }: { argArray: any[]; ret: any; key: string 
   console.log(`${key} 被调用`)
   argArray.length && console.log(`参数: `, inspect(argArray, { depth, colors: true }))
 
-  if (ret === undefined) return
-
   if (ret instanceof Promise) {
     console.log('返回值为 Promise，请观察后续打印内容')
     ret.then(
