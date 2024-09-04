@@ -16,6 +16,18 @@ interface hookWarpperConfigType {
 }
 
 /**
+ * 获取 NTCoreWrapper 实例
+ */
+export const getNTcore = () => {
+  if (!NTcore) throw new Error('NTcore 未初始化成功')
+
+  return NTcore
+}
+let NTcore: NTCoreWrapper | undefined
+let NodeIQQNTWrapperSession: NodeIQQNTWrapperSession | undefined
+let NTWrapperNodeApi: NTWrapperNodeApi | undefined
+
+/**
  * 用于避免多次调用 getService 造成的打印
  */
 const serviceMap = new Map<string, boolean>()
@@ -31,21 +43,38 @@ let hookConfig: hookWarpperConfigType | undefined
 const logFn = ({ argArray, ret, key }: { argArray: any[]; ret: any; key: string }) => {
   if ((key.endsWith('Service') && serviceMap.has(key)) || !hookConfig?.log) return
   key.endsWith('Service') && serviceMap.set(key, true)
+  const depth: number | null = 2
 
   console.log('-----------------------------------------------')
   console.log(`${key} 被调用`)
-  argArray.length && console.log(`参数: `, inspect(argArray, { depth: null, colors: true }))
+  argArray.length && console.log(`参数: `, inspect(argArray, { depth, colors: true }))
 
-  console.log(`返回值: `, inspect(ret, { depth: null, colors: true }))
+  if (ret === undefined) return
 
-  if (typeof ret === 'object' && ret) {
-    const retPropertyNames = Object.getOwnPropertyNames(ret)
-    retPropertyNames.length && console.log(`返回值 keys: `, inspect(retPropertyNames, { depth: null, colors: true }))
-
-    console.log(
-      `原型 keys: `,
-      inspect(Object.getOwnPropertyNames(Object.getPrototypeOf(ret)), { depth: null, colors: true })
+  if (ret instanceof Promise) {
+    console.log('返回值为 Promise，请观察后续打印内容')
+    ret.then(
+      (res) => {
+        console.log(`${key} 返回值: `)
+        console.log(inspect(res, { depth, colors: true }))
+      },
+      (err) => {
+        console.log(`${key} 返回值: `)
+        console.log(inspect(err, { depth, colors: true }))
+      }
     )
+  } else {
+    console.log(`返回值: `, inspect(ret, { depth, colors: true }))
+
+    if (typeof ret === 'object' && ret) {
+      const retPropertyNames = Object.getOwnPropertyNames(ret)
+      retPropertyNames.length && console.log(`返回值 keys: `, inspect(retPropertyNames, { depth, colors: true }))
+
+      console.log(
+        `原型 keys: `,
+        inspect(Object.getOwnPropertyNames(Object.getPrototypeOf(ret)), { depth, colors: true })
+      )
+    }
   }
 }
 
@@ -109,19 +138,6 @@ const hookInstance = ({ instance, rootKey }: { instance: Record<string, any>; ro
 }
 
 /**
- * 获取 NTCoreWrapper 实例
- */
-export const getNTcore = () => {
-  if (!NTcore) throw new Error('NTcore 未初始化成功')
-
-  return NTcore
-}
-let NTcore: NTCoreWrapper | undefined
-
-let NodeIQQNTWrapperSession: NodeIQQNTWrapperSession | undefined
-let NTWrapperNodeApi: NTWrapperNodeApi | undefined
-
-/**
  * hook wrapper
  */
 export const hookWrapper = (config?: hookWarpperConfigType): Promise<NTCoreWrapper> => {
@@ -148,6 +164,7 @@ export const hookWrapper = (config?: hookWarpperConfigType): Promise<NTCoreWrapp
 
         // hook 所有 wrapper 导出模块
         if (fileName.includes('wrapper.node')) {
+          // 这个类型已经过时了，但我也懒得改了...
           const wrapper = argArray[0].exports as NTWrapperNodeApi
           const hookWrapper = new Proxy(wrapper, {
             get(_, wrapperApiName: string, receiver) {
@@ -161,7 +178,7 @@ export const hookWrapper = (config?: hookWarpperConfigType): Promise<NTCoreWrapp
                 {
                   /**
                    * 拦截 get 和拦截 construct 的意义是一样的，新版QQ均是 xxx.get/xxx.create 进行构造实例
-                   * 当然还有一些静态属性，不过不再射程内
+                   * 当然还有 WrapperUtil 的一些静态属性，不过不太重要
                    */
                   get(_, p: string, receiver) {
                     const targetProperty: unknown = Reflect.get(wrapperApi, p, receiver)
