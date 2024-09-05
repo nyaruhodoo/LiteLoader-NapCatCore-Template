@@ -11,7 +11,7 @@
 
 ```ts
 // 如果 NTcore 中有这个API，那么你就可开心的直接调用
-const { result, errMsg, grabRedBagRsp } = await getNTcore().ApiMsg.grabRedBag()
+const { result, errMsg } = await getNTcore().ApiMsg.xxx()
 
 // 如果你想用的API不存在，你也可以直接引用 session 自行处理，自己做好类型支持就是了
 const { result, errMsg } = await getNTcore().session.xxx
