@@ -35,7 +35,7 @@ const serviceMap = new Map<string, boolean>()
 /**
  * 配置对象
  */
-let hookConfig: hookWarpperConfigType | undefined
+export let hookConfig: hookWarpperConfigType | undefined
 
 /**
  * 打印函数调用相关参数
@@ -140,104 +140,105 @@ const hookInstance = ({ instance, rootKey }: { instance: Record<string, any>; ro
  */
 export const hookWrapper = (config?: hookWarpperConfigType): Promise<NTCoreWrapper> => {
   hookConfig = config
+  const { promise, resolve } = Promise.withResolvers<NTCoreWrapper>()
 
-  return new Promise((res) => {
-    Process.dlopen = new Proxy(Process.dlopen, {
-      apply(
-        target,
-        thisArg,
-        argArray: [
-          {
-            id: number
-            loaded: boolean
-            exports: Record<string, any>
-            paths: []
-            children: []
-          },
-          string
-        ]
-      ) {
-        const [, fileName] = argArray
-        const nodeMod = Reflect.apply(target, thisArg, argArray)
+  Process.dlopen = new Proxy(Process.dlopen, {
+    apply(
+      target,
+      thisArg,
+      argArray: [
+        {
+          id: number
+          loaded: boolean
+          exports: Record<string, any>
+          paths: []
+          children: []
+        },
+        string
+      ]
+    ) {
+      const [, fileName] = argArray
+      const nodeMod = Reflect.apply(target, thisArg, argArray)
 
-        // hook 所有 wrapper 导出模块
-        if (fileName.includes('wrapper.node')) {
-          // 这个类型已经过时了，但我也懒得改了...
-          const wrapper = argArray[0].exports as NTWrapperNodeApi
-          const hookWrapper = new Proxy(wrapper, {
-            get(_, wrapperApiName: string, receiver) {
-              const wrapperApi: unknown = Reflect.get(wrapper, wrapperApiName, receiver)
-              if (typeof wrapperApi !== 'function') return wrapperApi
+      // hook 所有 wrapper 导出模块
+      if (fileName.includes('wrapper.node')) {
+        // 这个类型已经过时了，但我也懒得改了...
+        const wrapper = argArray[0].exports as NTWrapperNodeApi
+        const hookWrapper = new Proxy(wrapper, {
+          get(_, wrapperApiName: string, receiver) {
+            const wrapperApi: unknown = Reflect.get(wrapper, wrapperApiName, receiver)
+            if (typeof wrapperApi !== 'function') return wrapperApi
 
-              return new Proxy(
-                function () {
-                  // 由于所有属性都被添加了 configurable ，必须更改父级来做到 proxy
-                },
-                {
-                  /**
-                   * 拦截 get 和拦截 construct 的意义是一样的，新版QQ均是 xxx.get/xxx.create 进行构造实例
-                   * 当然还有 WrapperUtil 的一些静态属性，不过不太重要
-                   */
-                  get(_, p: string, receiver) {
-                    const targetProperty: unknown = Reflect.get(wrapperApi, p, receiver)
-                    if (typeof targetProperty !== 'function') return targetProperty
+            return new Proxy(
+              function () {
+                // 由于所有属性都被添加了 configurable ，必须更改父级来做到 proxy
+              },
+              {
+                /**
+                 * 拦截 get 和拦截 construct 的意义是一样的，新版QQ均是 xxx.get/xxx.create 进行构造实例
+                 * 当然还有 WrapperUtil 的一些静态属性，不过不太重要
+                 */
+                get(_, p: string, receiver) {
+                  const targetProperty: unknown = Reflect.get(wrapperApi, p, receiver)
+                  if (typeof targetProperty !== 'function') return targetProperty
 
-                    return new Proxy(targetProperty, {
-                      apply(target, thisArg, argArray) {
-                        const applyRet = Reflect.apply(target, thisArg, argArray)
-                        const key = `${wrapperApiName}/${p}`
+                  return new Proxy(targetProperty, {
+                    apply(target, thisArg, argArray) {
+                      const applyRet = Reflect.apply(target, thisArg, argArray)
+                      const key = `${wrapperApiName}/${p}`
 
-                        logFn({
-                          argArray,
-                          ret: applyRet,
-                          key
-                        })
+                      logFn({
+                        argArray,
+                        ret: applyRet,
+                        key
+                      })
 
-                        if (typeof applyRet !== 'object') return applyRet
+                      if (typeof applyRet !== 'object') return applyRet
 
-                        const hookApplyRet = hookInstance({
-                          instance: applyRet,
-                          rootKey: key
-                        })
+                      const hookApplyRet = hookInstance({
+                        instance: applyRet,
+                        rootKey: key
+                      })
 
-                        if (key === 'NodeIQQNTWrapperSession/create') {
-                          NodeIQQNTWrapperSession = hookApplyRet as NodeIQQNTWrapperSession
-                        }
-
-                        return hookApplyRet
+                      if (key === 'NodeIQQNTWrapperSession/create') {
+                        NodeIQQNTWrapperSession = hookApplyRet as NodeIQQNTWrapperSession
                       }
-                    })
-                  },
 
-                  // 拦截构造器已无任何意义，观察下来只有 NodeQQNTWrapperUtil 但也没什么实际意义，但我也懒得删了
-                  construct(_, argArray, newTarget) {
-                    const instance = Reflect.construct(wrapperApi, argArray, newTarget)
+                      return hookApplyRet
+                    }
+                  })
+                },
 
-                    logFn({
-                      key: wrapperApiName,
-                      ret: instance,
-                      argArray
-                    })
+                // 拦截构造器已无任何意义，观察下来只有 NodeQQNTWrapperUtil 但也没什么实际意义，但我也懒得删了
+                construct(_, argArray, newTarget) {
+                  const instance = Reflect.construct(wrapperApi, argArray, newTarget)
 
-                    return hookInstance({
-                      instance: instance,
-                      rootKey: wrapperApiName
-                    })
-                  }
+                  logFn({
+                    key: wrapperApiName,
+                    ret: instance,
+                    argArray
+                  })
+
+                  return hookInstance({
+                    instance: instance,
+                    rootKey: wrapperApiName
+                  })
                 }
-              )
-            }
-          })
-          NTWrapperNodeApi = argArray[0].exports = hookWrapper
-        }
-
-        return nodeMod
+              }
+            )
+          }
+        })
+        NTWrapperNodeApi = argArray[0].exports = hookWrapper
       }
-    })
 
-    // 等待登录
-    wrapperEmitter.once(EventEnum.onQRCodeLoginSucceed, () => {
-      res((NTcore = new NTCoreWrapper(NTWrapperNodeApi!, NodeIQQNTWrapperSession!)))
-    })
+      return nodeMod
+    }
   })
+
+  // 等待登录
+  wrapperEmitter.once(EventEnum.onQRCodeLoginSucceed, () => {
+    resolve((NTcore = new NTCoreWrapper(NTWrapperNodeApi!, NodeIQQNTWrapperSession!)))
+  })
+
+  return promise
 }

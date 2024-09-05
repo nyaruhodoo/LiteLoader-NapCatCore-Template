@@ -98,10 +98,12 @@ export const invokeNative = <T = unknown>({
   cmdName: string
   args: any[]
 }): Promise<{ result: number; errMsg: string } & T> => {
+  const { promise, resolve } = Promise.withResolvers<{ result: number; errMsg: string } & T>()
+
   const callbackId = randomUUID()
 
-  return new Promise((resolve) => {
-    ipcMain.emit(ipcName, {}, { type: 'request', callbackId, eventName }, [cmdName, ...args])
-    ipcEmitter.once(callbackId, resolve)
-  })
+  ipcMain.emit(ipcName, {}, { type: 'request', callbackId, eventName }, [cmdName, ...args])
+  ipcEmitter.once(callbackId, resolve)
+
+  return promise
 }
