@@ -14,7 +14,9 @@
 const { result, errMsg, grabRedBagRsp } = await getNTcore().ApiMsg.grabRedBag()
 
 // 如果因为版本问题出现不兼容，你也可以直接引用 session 自行处理，自己做好类型支持就是了
-const { result, errMsg, grabRedBagRsp } = await getNTcore().session.getMsgService().grabRedBag()
+const { result, errMsg, grabRedBagRsp } = await getNTcore().session.xxx
+
+// 其实 getNTcore 并不是必须的，只是因为我没有 export session ....
 ```
 
 ~~虽然也不是不可以我去维护 NapCatCore，可我自身已经没什么开发插件的需求了~~
@@ -35,7 +37,7 @@ const { result, errMsg, grabRedBagRsp } = await getNTcore().session.getMsgServic
 - [ ] 支持账号独立配置文件
 - [ ] 使用其他构建工具替换 Vite，目前所用的这一套还是太笨重了，在很多地方都存在不少问题
 - [ ] 集成插件自更新功能
-- [ ] 为 NapCatCore API提供更多 TS 类型，~~不靠十雪难道靠我吗？~~
+- [ ] 为 NapCatCore API提供更多 TS 类型，~~应该不会去做了~~
 
 ~~仓库是早上建的，坑是晚上弃的~~
 
@@ -65,8 +67,9 @@ export wrapperEmitter
 export getNTcore
 ```
 
-当你使用 `wrapperEmitter` 和 `eventBlacklist` 时，需要确认好事件名  
-我默认屏蔽了 2 个事件，结合 log 我想你很快知道如何使用
+当你使用 `wrapperEmitter` 或 `eventInterceptors` 时，需要确认好事件名  
+我默认屏蔽了 2 个事件，结合 log 我想你很快知道如何使用  
+ ~~其实就是把函数的调用全拼接到一起~~
 
 另一个注意的点是 NapCatCore 中的大多数 API 都需要登陆后调用，所以 await 会去等待登录后才执行
 
