@@ -11,10 +11,10 @@
 
 ```ts
 // 如果 NTcore 中有这个API，那么你就可开心的直接调用
-const { result, errMsg } = await getNTcore().ApiMsg.xxx()
+const { result, errMsg } = await NTcore.ApiMsg.xxx()
 
 // 如果你想用的API不存在，你也可以直接引用 session 自行处理，自己做好类型支持就是了
-const { result, errMsg } = await getNTcore().session.xxx
+const { result, errMsg } = await NTcore.session.xxx
 
 // 其实 getNTcore 并不是必须的，只是因为我没有 export session ....
 ```
@@ -46,12 +46,10 @@ const { result, errMsg } = await getNTcore().session.xxx
 ### Hook Wrapper
 
 可以先了解下 [NapCatCore](https://github.com/NapNeko/LiteLoader-NapCatCore)  
-该模板并不只是单纯的创建了 `NTCore` 实例，而是对 Wrapper 中的函数都进行了一层拦截用于做到更多事情，比如拦截事件、额外的 `eventEmitter`  
-~~如果你不喜欢可以参考 [NapCatExample](https://github.com/NapNeko/LiteLoader-NapCatExample) 使用非侵入式的方式创建 NTCore~~  
-~~我不觉得会有很大区别就是了~~
+该模板并不只是单纯的创建了 `NTCore` 实例，而是对 Wrapper 中的函数都进行了拦截用于做到更多事情  
+~~如果你不喜欢可以参考 [NapCatExample](https://github.com/NapNeko/LiteLoader-NapCatExample) 使用非侵入式的方式创建 NTCore，我不觉得会有很大区别就是了~~
 
 ```ts
-// 参数
 interface hookWarpperConfigType {
   // 是否打印日志
   log?: boolean
@@ -60,11 +58,6 @@ interface hookWarpperConfigType {
   // 拦截事件，可以修改参数
   eventInterceptors?: Record<string, (eventData: any) => any>
 }
-
-// 导出模块
-export hookWrapper
-export wrapperEmitter
-export getNTcore
 ```
 
 当你使用 `wrapperEmitter` 或 `eventInterceptors` 时，需要确认好事件名  
@@ -75,32 +68,22 @@ export getNTcore
 
 ```ts
 ;(async () => {
-  await hookWrapper({
-    eventBlacklist: [EventEnum.sendLog]
-  })
-
-  // 做你该做的事
+  await hookWrapper()
+  // 一些乱七八糟的初始化，如果你有依赖 NTCore 的话
 })()
 ```
 
 ### Hook IPC
 
-提供的参数和 wrapper 很类似，都可以做到对某个事件的中断以及参数修改
+提供的参数和 wrapper 类似，都可以做到对某个事件的中断以及参数修改
 
 ```ts
 // 参数
 interface hookIPCConfigType {
   log?: 'all' | 'send' | 'message'
-  // 需要忽略的黑名单事件
   eventBlacklist?: string[]
-  // 拦截事件，可以修改参数
   eventInterceptors?: Record<string, (args: any) => any>
 }
-
-// 导出模块
-export hookIPC
-export ipcEmitter
-export invokeNative
 ```
 
 `eventInterceptors` 和 `ipcEmitter` 中的事件名你同样可以通过开启 `log` 来查看  

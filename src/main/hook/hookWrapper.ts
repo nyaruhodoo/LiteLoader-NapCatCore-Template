@@ -1,5 +1,5 @@
-import { EventEmitter } from 'node:events'
 import type { NTWrapperNodeApi, NodeIQQNTWrapperSession } from 'napcat.core'
+import { EventEmitter } from 'node:events'
 import { NTCoreWrapper } from 'napcat.core'
 import Process from 'node:process'
 import { EventEnum } from '../enum/eventEnum'
@@ -15,17 +15,9 @@ interface hookWarpperConfigType {
   eventInterceptors?: Record<string, (eventData: any) => any>
 }
 
-/**
- * 获取 NTCoreWrapper 实例
- */
-export const getNTcore = () => {
-  if (!NTcore) throw new Error('NTcore 未初始化成功')
-
-  return NTcore
-}
-let NTcore: NTCoreWrapper | undefined
 let NodeIQQNTWrapperSession: NodeIQQNTWrapperSession | undefined
 let NTWrapperNodeApi: NTWrapperNodeApi | undefined
+export let NTcore: NTCoreWrapper | undefined
 
 /**
  * 用于避免多次调用 getService 造成的打印
@@ -35,7 +27,7 @@ const serviceMap = new Map<string, boolean>()
 /**
  * 配置对象
  */
-export let hookConfig: hookWarpperConfigType | undefined
+let hookConfig: hookWarpperConfigType | undefined
 
 /**
  * 打印函数调用相关参数
