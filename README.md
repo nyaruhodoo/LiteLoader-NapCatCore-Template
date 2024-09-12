@@ -17,10 +17,8 @@ const { result, errMsg } = await NTcore.ApiMsg.xxx()
 // 如果你想用的API不存在，你也可以直接引用 session 自行处理，自己做好类型支持就是了
 const { result, errMsg } = await NTcore.session.xxx
 
-// 其实 getNTcore 并不是必须的，只是因为我没有 export session ....
+// NTcore 并不是必须的，只是因为我没有 export session ....
 ```
-
-~~虽然也不是不可以我去维护 NapCatCore，可我自身已经没什么开发插件的需求了~~
 
 # LiteLoader-NapCatCore-Template
 
@@ -38,7 +36,6 @@ const { result, errMsg } = await NTcore.session.xxx
 - [ ] 支持账号独立配置文件
 - [ ] 使用其他构建工具替换 Vite，目前所用的这一套还是太笨重了，在很多地方都存在不少问题
 - [ ] 集成插件自更新功能
-- [ ] 为 NapCatCore API提供更多 TS 类型，~~应该不会去做了~~
 
 ~~仓库是早上建的，坑是晚上弃的~~
 
