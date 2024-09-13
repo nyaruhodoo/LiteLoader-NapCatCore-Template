@@ -16,6 +16,9 @@ export const enum EventEnum {
   // 广告?
   requestTianshuAdv = 'NodeIQQNTWrapperSession/create/getMsgService/requestTianshuAdv',
 
+  // 更新
+  fetchUnitedCommendConfig = 'NodeIQQNTWrapperSession/create/getUnitedConfigService/fetchUnitedCommendConfig',
+
   //----------------- * IPC 部分 * -----------------
 
   // 收到新消息(只会收到已激活窗口消息)
