@@ -1,3 +1,19 @@
+export interface hookWarpperConfigType {
+  // 是否打印日志
+  log?: boolean
+  // 需要忽略的黑名单事件
+  eventBlacklist?: (string | RegExp)[]
+  // 拦截事件，可以修改参数
+  eventInterceptors?: Record<string, (eventData: any) => any>
+}
+export interface hookIPCConfigType {
+  log?: 'all' | 'send' | 'message'
+  // 需要忽略的黑名单事件
+  eventBlacklist?: string[]
+  // 拦截事件，可以修改参数
+  eventInterceptors?: Record<string, (eventData: any) => any>
+}
+
 type SendRequestType<T = any> = [
   string,
   {

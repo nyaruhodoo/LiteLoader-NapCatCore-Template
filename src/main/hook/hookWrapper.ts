@@ -4,20 +4,12 @@ import { NTCoreWrapper } from 'napcat.core'
 import Process from 'node:process'
 import { EventEnum } from '../enum/eventEnum'
 import { inspect } from 'node:util'
-export const wrapperEmitter = new EventEmitter()
-
-interface hookWarpperConfigType {
-  // 是否打印日志
-  log?: boolean
-  // 需要忽略的黑名单事件
-  eventBlacklist?: string[]
-  // 拦截事件，可以修改参数
-  eventInterceptors?: Record<string, (eventData: any) => any>
-}
+import type { hookWarpperConfigType } from './type'
 
 let NodeIQQNTWrapperSession: NodeIQQNTWrapperSession | undefined
 let NTWrapperNodeApi: NTWrapperNodeApi | undefined
 export let NTcore: NTCoreWrapper | undefined
+export const wrapperEmitter = new EventEmitter()
 
 /**
  * 用于避免多次调用 getService 造成的打印
@@ -84,7 +76,14 @@ const hookInstance = ({ instance, rootKey }: { instance: Record<string, any>; ro
 
       return (...args) => {
         // 拦截黑名单事件
-        if (hookConfig?.eventBlacklist?.includes(key)) return
+        const isReturn = hookConfig?.eventBlacklist?.some((value) => {
+          if (typeof value === 'string') {
+            return key === value
+          } else {
+            return value.test(key)
+          }
+        })
+        if (isReturn) return
 
         // 对于监听器参数也进行hook
         if (key.endsWith('Listener')) {
@@ -99,7 +98,7 @@ const hookInstance = ({ instance, rootKey }: { instance: Record<string, any>; ro
 
         let applyRet = instance[p](...args)
 
-        // hook applyRef
+        // hook applyRet
         applyRet = hookConfig?.eventInterceptors?.[`${key}:response`]?.(applyRet) ?? applyRet
 
         // Service 需要额外处理一次

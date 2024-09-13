@@ -3,22 +3,15 @@ import type {
   IPCMessageRequestType,
   SendArgsType,
   SendRequestType,
-  SendResponseType
-} from '@/types/ipc'
+  SendResponseType,
+  hookIPCConfigType
+} from './type'
 import { randomUUID } from 'node:crypto'
 import { EventEmitter } from 'node:events'
 import { ipcMain } from 'electron'
 
 export const ipcEmitter = new EventEmitter()
 const callbackMap = new Map<string, string>()
-
-interface hookIPCConfigType {
-  log?: 'all' | 'send' | 'message'
-  // 需要忽略的黑名单事件
-  eventBlacklist?: string[]
-  // 拦截事件，可以修改参数
-  eventInterceptors?: Record<string, (eventData: any) => any>
-}
 
 export const hookIPC = (window: Electron.CrossProcessExports.BrowserWindow, config?: hookIPCConfigType) => {
   window.webContents.send = new Proxy(window.webContents.send, {
