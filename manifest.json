@@ -1,4 +1,5 @@
 {
+  "$schema": "https://raw.githubusercontent.com/adproqwq/LiteLoaderQQNT-Manifest-JsonSchema/main/manifest.schema.json",
   "manifest_version": 4,
   "type": "extension",
   "name": "liteloader-napcatcore-template",
