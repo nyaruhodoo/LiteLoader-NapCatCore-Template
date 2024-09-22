@@ -41,6 +41,9 @@ const { result, errMsg } = await NTcore.session.xxx
 
 ## 使用教程？文档？胡言乱语？
 
+如果你比起看文档更喜欢看项目那么可以跳转 [StarWand](https://github.com/nyaruhodoo/LiteLoader-StarWand)  
+其中包含了 hook wrapper 的一些基本使用
+
 ### Hook Wrapper
 
 可以先了解下 [NapCatCore](https://github.com/NapNeko/LiteLoader-NapCatCore)  
