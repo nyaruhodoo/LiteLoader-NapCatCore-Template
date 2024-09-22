@@ -30,7 +30,7 @@ const { result, errMsg } = await NTcore.session.xxx
 - 提供 Hook Wrapper / Hook IPC (侵入性那是相当强，从头 hook 到脚)
 
 ## 待办事项
-
+- [ ] 提供 listener 事件函数 
 - [ ] 修复 watch 打包
 - [ ] 支持更多组件用于丰富配置选项
 - [ ] 支持账号独立配置文件
