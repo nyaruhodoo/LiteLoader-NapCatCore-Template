@@ -228,4 +228,5 @@ linkEl.href = styleUrl
 shadow.append(linkEl)
 ```
 
-这些功能都是 `vite` 提供的，你也可以使用 `raw`、`base64` 等格式
+这些功能都是 `vite` 提供的，你也可以使用 `raw`、`base64` 等格式  
+~~其实BUG蛮多的，也就处理CSS可以简单用一下，其他资源还是建议自己通过LL的API去拼接路径~~
