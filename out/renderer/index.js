@@ -1,29 +1,30 @@
 const p = {
   test: !1
-}, d = 4, g = "extension", f = "liteloader-napcatcore-template", a = "liteloader-napcatcore-template", m = "LiteLoaderQQNT的插件模板", y = "0.0.1", h = [
+}, d = "https://raw.githubusercontent.com/adproqwq/LiteLoaderQQNT-Manifest-JsonSchema/main/manifest.schema.json", g = 4, f = "extension", m = "liteloader-napcatcore-template", a = "liteloader-napcatcore-template", y = "LiteLoaderQQNT的插件模板", h = "0.0.1", w = [
   {
     name: "Nyaruhodo",
     link: "https://github.com/nyaruhodoo"
   }
-], w = [], C = [
+], C = [], v = [
   "win32",
   "linux",
   "darwin"
-], v = {
+], x = {
   renderer: "./out/renderer/index.js",
   main: "./out/main/index.js",
   preload: "./out/preload/index.js"
 }, u = {
-  manifest_version: d,
-  type: g,
-  name: f,
+  $schema: d,
+  manifest_version: g,
+  type: f,
+  name: m,
   slug: a,
-  description: m,
-  version: y,
-  authors: h,
-  dependencies: w,
-  platform: C,
-  injects: v
+  description: y,
+  version: h,
+  authors: w,
+  dependencies: C,
+  platform: v,
+  injects: x
 };
 class c {
   /**
@@ -115,7 +116,7 @@ class c {
     }
   }
 }
-const x = (s) => [
+const b = (s) => [
   {
     title: "配置标题",
     foldTitle: "123",
@@ -138,7 +139,7 @@ const x = (s) => [
     const e = s.customStoreFormat ? s.customStoreFormat(t.value) : t.value;
     n(s.keyPath, e);
   }), t;
-}, b = ({
+}, L = ({
   config: s,
   update: n
 }) => {
@@ -162,7 +163,7 @@ const x = (s) => [
     const i = c.setProperty.bind(null, n);
     switch (s.type) {
       case "setting-switch":
-        e = b({
+        e = L({
           config: s,
           update: i
         });
@@ -179,7 +180,7 @@ const x = (s) => [
     t.append(e);
   }
   return t;
-}, L = (s) => x(s).map(({ title: t, list: e, foldTitle: i }) => {
+}, S = (s) => b(s).map(({ title: t, list: e, foldTitle: i }) => {
   const o = document.createElement("setting-section");
   t && o.setAttribute("data-title", t), o.innerHTML = `
       <setting-panel>
@@ -191,7 +192,7 @@ const x = (s) => [
   for (const l of e)
     r?.append(k(l, s));
   return o;
-}), S = "" + new URL("index.css", import.meta.url).href, A = window[a], P = async (s) => {
+}), A = "" + new URL("index.css", import.meta.url).href, P = window[a], T = async (s) => {
   const n = await c.getConfig(), t = c.createDeepProxy(n, {
     set(e, i, o) {
       e[i] = o;
@@ -201,20 +202,20 @@ const x = (s) => [
   });
   return t;
 };
-class T extends HTMLElement {
+class M extends HTMLElement {
   async connectedCallback() {
     const n = this.attachShadow({ mode: "open" }), t = document.createElement("link");
-    t.rel = "stylesheet", t.href = S, n.append(t);
-    const e = await P((i) => {
-      A.configUpdate(i), new BroadcastChannel(a).postMessage(i);
+    t.rel = "stylesheet", t.href = A, n.append(t);
+    const e = await T((i) => {
+      P.configUpdate(i), new BroadcastChannel(a).postMessage(i);
     });
-    n.append(...L(e));
+    n.append(...S(e));
   }
 }
-customElements.define(a, T);
-const M = (s) => {
+customElements.define(a, M);
+const O = (s) => {
   s.innerHTML = `<${a}></${a}>`;
 };
 export {
-  M as onSettingWindowCreated
+  O as onSettingWindowCreated
 };

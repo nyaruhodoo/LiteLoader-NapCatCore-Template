@@ -3,7 +3,7 @@ import { EventEnum } from './enum/eventEnum'
 ;(async () => {
   await hookWrapper({
     log: false,
-    eventBlacklist: [EventEnum.sendLog, EventEnum.fetchUnitedCommendConfig, /tianshu/i],
+    eventBlacklist: [EventEnum.sendLog, /tianshu/i],
     eventInterceptors: {}
   })
 })()
