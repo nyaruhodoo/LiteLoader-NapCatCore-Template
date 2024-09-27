@@ -1,10 +1,10 @@
 # 写在最前
 
-测试版本 **9.9.15-27597**
+测试版本 **9.9.15-28327**
 
 由于 26909 版本后 wrapper 有很大改动，导致该模板并不能同时支持之前版本  
 并且由于 NapCatCore 已被入土，在使用时难免会遇到一些不如意的问题  
-~~参数错误、类型错误~~
+~~参数错误、类型错误、这个API压根不存在~~  
 
 不过你也不用太过担心，实际上本项目与 NapCatCore 并不具备什么依赖性  
 ~~我经常在想为什么这个项目要叫做 NapCatCore-Template~~  
@@ -42,7 +42,7 @@ const { result, errMsg } = await NTcore.session.xxx
 ## 使用教程？文档？胡言乱语？
 
 如果你比起看文档更喜欢看项目那么可以跳转 [StarWand](https://github.com/nyaruhodoo/LiteLoader-StarWand)  
-其中包含了 hook wrapper 的一些基本使用
+其中包含了 hook wrapper 的一些基本使用，主要是一些事件的参数修改以及中断
 
 ### Hook Wrapper
 
@@ -146,7 +146,7 @@ interface hookIPCConfigType {
 
 具体的细节就不再过多描述，你可以直接去阅读代码
 
-`Hook IPC` 与 `Hook Wrapper` 可以共存，但因提供的功能比较类似还是只推荐使用其一
+`Hook IPC` 与 `Hook Wrapper` 可以共存，但因提供的功能比较类似还是只推荐使用其一，如果有什么新想法我也只会在 wrapper 那边进行实现
 
 ### 修改 manifest & defaultConfig & createConfigViewConfig
 
